@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "phonenumber_field",
+    # Local
+    "accounts.apps.AccountsConfig",
 ]
 
 MIDDLEWARE = [
@@ -80,12 +82,6 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-"""DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}"""
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -138,3 +134,8 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Custom User
+# https://docs.djangoproject.com/fr/4.1/topics/auth/customizing/
+AUTH_USER_MODEL = "accounts.CustomUser"
