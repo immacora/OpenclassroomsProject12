@@ -52,7 +52,7 @@ pip install -r requirements.txt
 Install [PostgreSQL 15.3](https://www.postgresql.org/download/).
 
 ```sh
-Create a new PostgreSQL database. Be sure to use these DATABASES settings values or modify the settings.py file.
+Create a new PostgreSQL database. Be sure to use these DATABASES values or modify the settings.py file.
 
 DATABASES = {
     'default': {
@@ -83,7 +83,7 @@ py manage.py runserver
 
 ## Postman Documentation
 
-https://documenter.getpostman.com/view/24942161/2s93eSZFPN
+https://documenter.getpostman.com/view/24942161/2s9XxvSufo
 
 
 
