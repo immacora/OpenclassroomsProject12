@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "locations.apps.LocationsConfig",
     "clients.apps.ClientsConfig",
     "contracts.apps.ContractsConfig",
+    "events.apps.EventsConfig",
 ]
 
 MIDDLEWARE = [
