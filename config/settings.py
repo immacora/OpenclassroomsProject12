@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "accounts.apps.AccountsConfig",
     "apis.apps.ApisConfig",
     "locations.apps.LocationsConfig",
+    "clients.apps.ClientsConfig",
 ]
 
 MIDDLEWARE = [
