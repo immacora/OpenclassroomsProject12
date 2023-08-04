@@ -2,6 +2,8 @@ import uuid
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
 
 from helpers.validators import unicodealphavalidator
 from helpers.models import TimestampedModel
@@ -68,7 +70,11 @@ class CustomUser(AbstractUser):
 
 
 class Employee(TimestampedModel):
-    """Epic Events employee profile model for CustomUser."""
+    """
+    Epic Events employee profile model for CustomUser.
+    A post_save signal sets the is_staff permission to the linked user if the employee's department is MANAGEMENT.
+    A post_delete signal deletes the linked user if the employee is deleted.
+    """
 
     DEPARTMENT = [
         ("MANAGEMENT", "Gestion"),
@@ -93,3 +99,18 @@ class Employee(TimestampedModel):
 
     def __str__(self):
         return f"Employé {self.last_name} {self.first_name} du département {self.department}"
+
+
+@receiver(post_save, sender=Employee)
+def update_user_staff_permission(sender, instance, **kwargs):
+    """Add is_staff permission on creation and update to linked users if the employee's department is MANAGEMENT."""
+    if instance.department == "MANAGEMENT":
+        instance.user.is_staff = True
+    else:
+        instance.user.is_staff = False
+    instance.user.save()
+
+
+@receiver(post_delete, sender=Employee)
+def delete_linked_user(sender, instance, **kwargs):
+    instance.user.delete()
