@@ -42,8 +42,10 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "phonenumber_field",
+    "rest_framework_simplejwt.token_blacklist",
     # Local
     "accounts.apps.AccountsConfig",
+    "apis.apps.ApisConfig",
 ]
 
 MIDDLEWARE = [
@@ -139,3 +141,32 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Custom User
 # https://docs.djangoproject.com/fr/4.1/topics/auth/customizing/
 AUTH_USER_MODEL = "accounts.CustomUser"
+
+
+# Whitelist of origins that are authorized to make cross-site HTTP requests
+CORS_ALLOWED_ORIGINS = ("http://localhost:8000",)
+
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8000"]
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 10,
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "SIGNING_KEY": SECRET_KEY,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "USER_ID_FIELD": "user_id",
+}
