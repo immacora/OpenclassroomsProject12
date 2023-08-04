@@ -3,9 +3,17 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 
+from .models import Employee
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
 CustomUser = get_user_model()
+
+
+class EmployeeAdmin(admin.ModelAdmin):
+    """Define admin model for employee model."""
+
+    list_display = ["last_name", "first_name", "employee_number", "department", "user", "created_at", "updated_at"]
+    readonly_fields = ("created_at", "updated_at")
 
 
 class CustomUserAdmin(UserAdmin):
@@ -46,3 +54,4 @@ class CustomUserAdmin(UserAdmin):
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(Employee, EmployeeAdmin)

@@ -3,6 +3,9 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from helpers.validators import unicodealphavalidator
+from helpers.models import TimestampedModel
+
 
 class CustomUserManager(BaseUserManager):
     """
@@ -62,3 +65,31 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class Employee(TimestampedModel):
+    """Epic Events employee profile model for CustomUser."""
+
+    DEPARTMENT = [
+        ("MANAGEMENT", "Gestion"),
+        ("SALES", "Commercial"),
+        ("SUPPORT", "Support"),
+    ]
+    employee_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    employee_number = models.PositiveIntegerField(
+        "Numéro d'employé",
+        unique=True,
+    )
+    first_name = models.CharField(
+        "Prénom", max_length=100, validators=[unicodealphavalidator]
+    )
+    last_name = models.CharField(
+        "Nom", max_length=100, validators=[unicodealphavalidator]
+    )
+    department = models.CharField("Département ", max_length=10, choices=DEPARTMENT)
+    user = models.OneToOneField(
+        to=CustomUser, on_delete=models.PROTECT, verbose_name="utilisateur"
+    )
+
+    def __str__(self):
+        return f"Employé {self.last_name} {self.first_name} du département {self.department}"
