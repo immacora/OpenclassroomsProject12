@@ -13,3 +13,9 @@ unicodecharfieldvalidator = RegexValidator(
     tiret, underscore, @ et espace.",
     code="Saisie invalide",
 )
+
+textfieldvalidator = RegexValidator(
+    r'^[^<>&~`;%=\n\r\t\$\\\|\/\{\}\[\]\+\*]*$',
+    message="La saisie ne doit pas comporter de caractères spéciaux.",
+    code='Saisie invalide'
+    )
