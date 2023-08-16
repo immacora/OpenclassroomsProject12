@@ -57,7 +57,7 @@ Create a new PostgreSQL database. Be sure to use these DATABASES values or modif
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'EpicEvent',
+        'NAME': 'EpicEvents',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': 'localhost',
