@@ -1,5 +1,5 @@
 import uuid
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser, BaseUserManager, Group
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import post_delete, post_save
@@ -7,6 +7,7 @@ from django.dispatch import receiver
 
 from helpers.validators import unicodealphavalidator
 from helpers.models import TimestampedModel
+from .permissions import add_default_permissions_to_groups
 
 
 class CustomUserManager(BaseUserManager):
@@ -72,8 +73,8 @@ class CustomUser(AbstractUser):
 class Employee(TimestampedModel):
     """
     Epic Events employee profile model for CustomUser.
-    A post_save signal sets the is_staff permission to the linked user if the employee's department is MANAGEMENT.
-    A post_delete signal deletes the linked user if the employee is deleted.
+    A post_save signal sets groups with default permissions for the linked user.
+    A post_delete signal deletes the linked user when deleting the employee.
     """
 
     DEPARTMENT = [
@@ -102,11 +103,33 @@ class Employee(TimestampedModel):
 
 
 @receiver(post_save, sender=Employee)
-def update_user_staff_permission(sender, instance, **kwargs):
-    """Add is_staff permission on creation and update to linked users if the employee's department is MANAGEMENT."""
+def add_groups_with_default_permissions(sender, instance, **kwargs):
+    """
+    Create users groups if they don't exist.
+    Remove user from all groups if change (the user can only be part of one).
+    Add a user to the group based on their department with their default permissions.
+    Add is_staff permission to linked users if the employee's department is MANAGEMENT.
+    """
+
+    groups = Group.objects.all()
+    if len(groups) == 0:
+        management_group = Group.objects.create(name="management")
+        sales_group = Group.objects.create(name="sales")
+        support_group = Group.objects.create(name="support")
+        add_default_permissions_to_groups(management_group, sales_group, support_group)
+
+    user_groups = instance.user.groups.all()
+    for group in user_groups:
+        group.user_set.remove(instance.user)
+
     if instance.department == "MANAGEMENT":
+        instance.user.groups.add(Group.objects.get(name="management"))
         instance.user.is_staff = True
     else:
+        if instance.department == "SALES":
+            instance.user.groups.add(Group.objects.get(name="sales"))
+        elif instance.department == "SUPPORT":
+            instance.user.groups.add(Group.objects.get(name="support"))
         instance.user.is_staff = False
     instance.user.save()
 
