@@ -1,7 +1,8 @@
 # OpenclassroomsProject12
 Backend REST API for Epic Events CRM app.
+The project is defined in the specifications (documentation directory).
 
-<p>
+<p align="center">
   <img src="img/logo_light.png#gh-light-mode-only" alt="logo-light" />
   <img src="img/logo_dark.png#gh-dark-mode-only" alt="logo-dark" />
 </p>
@@ -52,16 +53,16 @@ pip install -r requirements.txt
 Install [PostgreSQL 15.3](https://www.postgresql.org/download/).
 
 ```sh
-Create a new PostgreSQL database. Be sure to use these DATABASES values or modify the settings.py file.
+Create a new PostgreSQL database and replace the settings with your own (settings.py file).
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'EpicEvents',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'localhost',
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "YourDBname",
+        "USER": "YourUserName",
+        "PASSWORD": "YourDBpassword",
+        "HOST": "localhost",
+        "PORT": "5432",
     }
 }
 ```
@@ -69,7 +70,11 @@ DATABASES = {
 ### Project Setup and Run
 
 ```sh
-py manage.py make migrations
+py manage.py makemigrations accounts
+py manage.py makemigrations locations
+py manage.py makemigrations clients
+py manage.py makemigrations contracts
+py manage.py makemigrations events
 ```
 
 ```sh
@@ -77,8 +82,24 @@ py manage.py migrate
 ```
 
 ```sh
+py manage.py loaddata employees.json
+```
+
+```sh
 py manage.py runserver
 ```
+
+### First Login
+* email : adminTEST@email.com
+* password : 123456789!
+
+Recommendations
+
+Use the test admin employee account to create a new admin employee then delete the test employee account.
+
+### Account particularity
+
+The deletion of a user is linked to that of the employee. You must remove an employee to remove his linked user.
 
 
 ## Postman Documentation
