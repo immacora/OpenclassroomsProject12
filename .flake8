@@ -6,8 +6,9 @@ exclude=
     .gitignore,
     .venv/,
     documentation/,
-    config/settings.py,
+    config/settings/,
     requirements.txt,
+    manage.py,
     README.md
 
 max-line-length = 119

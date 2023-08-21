@@ -38,7 +38,7 @@ git clone https://github.com/immacora/OpenclassroomsProject12
 cd OpenclassroomsProject12
 ```
 
-### Active environment and Install dependencies (Windows 11)
+### Active environment and Install dependencies using pip (Windows 11)
 ```sh
 py -m venv .venv
 ```
@@ -52,19 +52,28 @@ pip install -r requirements.txt
 ### Create PostgreSQL database
 Install [PostgreSQL 15.3](https://www.postgresql.org/download/).
 
-```sh
-Create a new PostgreSQL database and replace the settings with your own (settings.py file).
+[Create a new PostgreSQL database](https://www.postgresqltutorial.com/postgresql-getting-started/connect-to-postgresql-database/) for the project.
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "YourDBname",
-        "USER": "YourUserName",
-        "PASSWORD": "YourDBpassword",
-        "HOST": "localhost",
-        "PORT": "5432",
-    }
-}
+### Settings and Environment Variables
+Create a .env file in the project's root folder.
+Paste all the following variables with your own values
+
+```sh
+# django
+SECRET_KEY=YourSecretKey
+ALLOWED_HOSTS=YourAllowedHosts # test production: *
+CORS_ALLOWED_ORIGINS=YourAllowedHTTP # ex: http://localhost:8000
+CSRF_TRUSTED_ORIGINS=YourTrustedHTTP # ex: http://localhost:8000
+
+# postgresql
+POSTGRES_DB_NAME=YourDBname
+POSTGRES_USER=YourUserName
+POSTGRES_PASSWORD=YourDBpassword
+POSTGRES_PORT=YourPort # ex: 5432
+
+# simplejwt
+ACCESS_TOKEN_LIFETIME=NumberOfLifetimeMinutes # ex: 5
+REFRESH_TOKEN_LIFETIME=NumberOfLifetimeDays # ex: 1
 ```
 
 ### Project Setup and Run
@@ -89,13 +98,9 @@ py manage.py loaddata employees.json
 py manage.py runserver
 ```
 
-### First Login
+### Login
 * email : adminTEST@email.com
 * password : 123456789!
-
-Recommendations
-
-Use the test admin employee account to create a new admin employee then delete the test employee account.
 
 ### Account particularity
 
@@ -110,7 +115,7 @@ https://documenter.getpostman.com/view/24942161/2s9XxvSufo
 
 ### Run tests
 
-`py manage.py test`
+`pytest`
 
 
 ### Run flake8 report
