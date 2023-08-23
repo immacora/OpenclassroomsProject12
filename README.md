@@ -112,11 +112,13 @@ In the API, the creation, update and deletion of a user are linked to that of th
 https://documenter.getpostman.com/view/24942161/2s9XxvSufo
 
 
-
 ### Run tests
 
 `pytest`
 
+### Generate coverage report
+
+`coverage html`
 
 ### Generate flake8 report
 
