@@ -1,7 +1,11 @@
 import uuid
 from django.db import models
 
-from helpers.validators import unicodealphavalidator, unicodecharfieldvalidator
+from helpers.validators import (
+    unicodealphavalidator,
+    unicodecharfieldvalidator,
+    digitalcharfieldvalidator,
+)
 
 
 class Location(models.Model):
@@ -15,13 +19,16 @@ class Location(models.Model):
     city = models.CharField(
         "Nom de la ville", max_length=100, validators=[unicodealphavalidator]
     )
-    zip_code = models.PositiveSmallIntegerField("Code postal")
+    zip_code = models.CharField(
+        "Code postal", max_length=5, validators=[digitalcharfieldvalidator]
+    )
     country = models.CharField(
         "Nom du pays", max_length=100, validators=[unicodealphavalidator]
     )
 
     class Meta:
         unique_together = ("street_number", "street_name", "city")
+        ordering = ["zip_code"]
 
     def __str__(self):
-        return f"Adresse : {self.street_number} {self.street_name}, {self.zip_code} {self.city} {self.country}."
+        return f"{self.street_number} {self.street_name}, {self.zip_code}, {self.city} - {self.country}"

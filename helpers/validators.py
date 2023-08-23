@@ -15,7 +15,13 @@ unicodecharfieldvalidator = RegexValidator(
 )
 
 textfieldvalidator = RegexValidator(
-    r'^[^<>&~`;%=\n\r\t\$\\\|\/\{\}\[\]\+\*]*$',
+    r"^[^<>&~`;%=\n\r\t\$\\\|\/\{\}\[\]\+\*]*$",
     message="La saisie ne doit pas comporter de caractères spéciaux.",
-    code='Saisie invalide'
-    )
+    code="Saisie invalide",
+)
+
+digitalcharfieldvalidator = RegexValidator(
+    r"^[0-9]+$",
+    message="La saisie doit comporter uniquement des caractères numériques.",
+    code="Saisie invalide",
+)
