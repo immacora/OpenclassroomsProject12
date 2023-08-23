@@ -3,6 +3,7 @@ from django.contrib import admin
 from .models import Client
 
 
+@admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
     """Define admin model for client model."""
 
@@ -18,6 +19,3 @@ class ClientAdmin(admin.ModelAdmin):
         "updated_at",
     ]
     readonly_fields = ("created_at", "updated_at")
-
-
-admin.site.register(Client, ClientAdmin)

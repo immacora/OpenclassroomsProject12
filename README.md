@@ -104,7 +104,7 @@ py manage.py runserver
 
 ### Account particularity
 
-The deletion of a user is linked to that of the employee. You must remove an employee to remove his linked user.
+In the API, the creation, update and deletion of a user are linked to that of the employee. You must perform these actions via the employee account.
 
 
 ## Postman Documentation
@@ -118,6 +118,6 @@ https://documenter.getpostman.com/view/24942161/2s9XxvSufo
 `pytest`
 
 
-### Run flake8 report
+### Generate flake8 report
 
 `flake8 --format=html --htmldir=flake-report`

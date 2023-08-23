@@ -67,7 +67,7 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
 
     def __str__(self):
-        return self.email
+        return f"{self.email}, administrateur: {self.is_staff}, actif: {self.is_active}"
 
 
 class Employee(TimestampedModel):
@@ -97,6 +97,9 @@ class Employee(TimestampedModel):
     user = models.OneToOneField(
         to=CustomUser, on_delete=models.PROTECT, verbose_name="utilisateur"
     )
+
+    class Meta:
+        ordering = ["department", "last_name"]
 
     def __str__(self):
         return f"Employé {self.last_name} {self.first_name} du département {self.department}"
