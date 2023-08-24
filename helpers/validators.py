@@ -8,9 +8,9 @@ unicodealphavalidator = RegexValidator(
 )
 
 unicodecharfieldvalidator = RegexValidator(
-    r"^[\da-zA-ZÀ-ÿ'@_\- ]+$",
+    r"^[\da-zA-ZÀ-ÿ'@.\- ]+$",
     message="La saisie doit comporter uniquement des caractères alphanumériques avec apostrophe,\
-    tiret, underscore, @ et espace.",
+    tiret, @, point et espace.",
     code="Saisie invalide",
 )
 
