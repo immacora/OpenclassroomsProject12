@@ -1,7 +1,11 @@
 import pytest
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
+from faker import Faker
 
+from accounts.models import Employee
+
+fake = Faker()
 CustomUser = get_user_model()
 
 
@@ -39,3 +43,107 @@ class TestCreateUsers:
         assert new_superuser.is_active
         assert new_superuser.is_staff
         assert new_superuser.is_superuser
+
+
+class TestCreateEmployees:
+    """
+    GIVEN a new_employee fixture
+    WHEN an employee from each department is created
+    THEN checks that the department, its group and permissions are ok
+    """
+
+    def test_create_management_employee(self, new_employee):
+        """
+        Tests if MANAGEMENT employee creation :
+            is True for staff and False for superuser,
+            add user to group management,
+            has a user who has the default following permissions.
+        """
+        assert Employee.objects.count() == 1
+        assert CustomUser.objects.count() == 1
+        assert new_employee.department == "MANAGEMENT"
+        assert new_employee.user.is_staff
+        assert new_employee.user.is_superuser is False
+        assert str(new_employee.user.groups.get()) == "management"
+        assert new_employee.user.get_all_permissions() == {
+            "contracts.view_contract",
+            "clients.view_client",
+            "contracts.add_contract",
+            "accounts.add_customuser",
+            "accounts.change_employee",
+            "accounts.delete_employee",
+            "accounts.add_employee",
+            "events.change_event",
+            "accounts.change_customuser",
+            "events.view_event",
+            "accounts.view_employee",
+            "locations.view_location",
+            "contracts.change_contract",
+            "accounts.view_customuser",
+        }
+
+    def test_create_sales_employee(self, new_employee):
+        """
+        Tests if SALES employee creation :
+            is False for staff and superuser,
+            add user to group sales,
+            has a user who has the default following permissions.
+        """
+        assert Employee.objects.count() == 1
+        assert CustomUser.objects.count() == 1
+        assert new_employee.department == "SALES"
+        assert new_employee.user.is_staff is False
+        assert new_employee.user.is_superuser is False
+        assert str(new_employee.user.groups.get()) == "sales"
+        assert new_employee.user.get_all_permissions() == {
+            "locations.change_location",
+            "locations.view_location",
+            "clients.add_client",
+            "clients.view_client",
+            "contracts.view_contract",
+            "locations.add_location",
+            "events.view_event",
+        }
+
+    def test_create_support_employee(self, new_employee):
+        """
+        Tests if SUPPORT employee creation :
+            is False for staff and superuser,
+            add user to group support,
+            has a user who has the default following permissions.
+        """
+        assert Employee.objects.count() == 1
+        assert CustomUser.objects.count() == 1
+        assert new_employee.department == "SUPPORT"
+        assert new_employee.user.is_staff is False
+        assert new_employee.user.is_superuser is False
+        assert str(new_employee.user.groups.get()) == "support"
+        assert new_employee.user.get_all_permissions() == {
+            "locations.change_location",
+            "locations.add_location",
+            "locations.view_location",
+        }
+
+    def test_create_employee_with_not_unique_number_raises_error(
+        self, new_employee, new_custom_user
+    ):
+        """Tests if employee creation raise IntegrityError with not unique number."""
+        with pytest.raises(IntegrityError):
+            Employee.objects.create(
+                employee_number=new_employee.employee_number,
+                first_name=fake.first_name(),
+                last_name=fake.last_name(),
+                department="SALES",
+                user=new_custom_user,
+            )
+
+    def test_create_employees_with_same_user_raises_error(self, new_employee):
+        """Tests if employees creation raise IntegrityError with the same user."""
+        with pytest.raises(IntegrityError):
+            Employee.objects.create(
+                employee_number=4578,
+                first_name=fake.first_name(),
+                last_name=fake.last_name(),
+                department="SALES",
+                user=new_employee.user,
+            )
