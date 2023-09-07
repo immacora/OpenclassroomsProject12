@@ -9,7 +9,7 @@ from helpers.validators import (
 
 
 @pytest.mark.django_db
-class Testvalidators:
+class TestValidators:
     """
     GIVEN a value from a user input
     WHEN the request is submitted
@@ -20,7 +20,8 @@ class Testvalidators:
         """Checks that the return contains only alphabetic characters with apostrophe, hyphen and space."""
 
         # Valid input
-        unicodealphavalidator("Nom-composé d'un utilisateur")
+        valid_input = "Nom-composé d'un utilisateur"
+        unicodealphavalidator(valid_input)
 
         # Invalid input
         invalid_inputs = ["123", "user1", "Special !@#$ characters"]

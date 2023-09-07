@@ -2,13 +2,18 @@
 omit =
     *venv/*
     conftest.py
-    *tests*
+    */tests/*
+    *__init__.py*
     *settings.py*
+    */migrations/*
+    */config/*
 
 [report]
 omit =
    *venv/*
    conftest.py
-   *tests*
+   */tests/*
    *__init__.py*
    *settings.py*
+   */migrations/*
+   */config/*
