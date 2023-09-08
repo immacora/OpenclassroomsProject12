@@ -34,6 +34,7 @@ def new_employee(db, employee_factory):
 @pytest.fixture
 def employees_users_with_tokens(db, employee_factory):
     """Create an employee from each department with their associated access and refresh tokens for users."""
+    employee_factory.department.reset()
 
     management_employee = employee_factory.create()
     sales_employee = employee_factory.create()
