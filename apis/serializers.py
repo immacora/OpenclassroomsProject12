@@ -29,7 +29,7 @@ class CreateCustomUserSerializer(ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ("email", "password", "password2")
+        fields = ("user_id", "email", "password", "password2")
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password2"]:
@@ -46,6 +46,7 @@ class CreateEmployeeSerializer(ModelSerializer):
     class Meta:
         model = Employee
         fields = (
+            "employee_id",
             "employee_number",
             "last_name",
             "first_name",
@@ -54,6 +55,7 @@ class CreateEmployeeSerializer(ModelSerializer):
             "created_at",
             "updated_at",
         )
+        read_only__fields = "employee_id", "created_at", "updated_at"
 
 
 class CustomUserDetailSerializer(ModelSerializer):
@@ -61,8 +63,8 @@ class CustomUserDetailSerializer(ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ("email", "is_active", "is_staff", "date_joined")
-        read_only__fields = "is_staff", "date_joined"
+        fields = ("user_id", "email", "is_active", "is_staff", "date_joined")
+        read_only__fields = "user_id", "is_staff", "date_joined"
 
 
 class EmployeeDetailSerializer(ModelSerializer):
@@ -73,6 +75,7 @@ class EmployeeDetailSerializer(ModelSerializer):
     class Meta:
         model = Employee
         fields = (
+            "employee_id",
             "employee_number",
             "last_name",
             "first_name",
@@ -81,6 +84,7 @@ class EmployeeDetailSerializer(ModelSerializer):
             "created_at",
             "updated_at",
         )
+        read_only__fields = "employee_id", "created_at", "updated_at"
 
 
 class CustomUserListSerializer(ModelSerializer):
@@ -88,7 +92,11 @@ class CustomUserListSerializer(ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ("email",)
+        fields = (
+            "user_id",
+            "email",
+        )
+        read_only__fields = "user_id"
 
 
 class EmployeeListSerializer(ModelSerializer):
@@ -99,8 +107,10 @@ class EmployeeListSerializer(ModelSerializer):
     class Meta:
         model = Employee
         fields = (
+            "employee_id",
             "last_name",
             "first_name",
             "department",
             "user",
         )
+        read_only__fields = "employee_id"
