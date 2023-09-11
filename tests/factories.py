@@ -21,7 +21,7 @@ class EmployeeFactory(factory.django.DjangoModelFactory):
         model = Employee
 
     employee_number = factory.Sequence(lambda n: n)
-    first_name = fake.first_name()
-    last_name = fake.last_name()
+    first_name = factory.LazyAttribute(lambda _: fake.first_name())
+    last_name = factory.LazyAttribute(lambda _: fake.last_name())
     department = factory.Iterator(["MANAGEMENT", "SALES", "SUPPORT"])
     user = factory.SubFactory(CustomUserFactory)

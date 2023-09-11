@@ -20,8 +20,9 @@ class TestGetEmployees:
         WHEN the employees endpoint is requested (GET)
         THEN checks that response is 200 and datas are displayed
         """
-        management_employee = employees_users_with_tokens["management_employee"]
-        access_token = management_employee.user.access_token
+        access_token = employees_users_with_tokens[
+            "management_employee"
+        ].user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
         response = api_client.get(reverse("employees"), headers=headers)
         assert response.status_code == status.HTTP_200_OK
@@ -38,8 +39,7 @@ class TestGetEmployees:
         WHEN the employees endpoint is requested (GET)
         THEN checks that response is 403 and error message is displayed
         """
-        sales_employee = employees_users_with_tokens["sales_employee"]
-        access_token = sales_employee.user.access_token
+        access_token = employees_users_with_tokens["sales_employee"].user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
         response = api_client.get(reverse("employees"), headers=headers)
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -52,7 +52,7 @@ class TestGetEmployees:
             in response.data["detail"]
         )
 
-    def test_get_employees_route_failed_with_unauthorized(self, db, api_client):
+    def test_get_employees_route_failed_with_unauthorized(self, api_client, employees_users_with_tokens):
         """
         GIVEN an invalid token
         WHEN the employees endpoint is requested (GET)
@@ -62,8 +62,8 @@ class TestGetEmployees:
         headers = {"Authorization": f"Bearer {access_token}"}
         response = api_client.get(reverse("employees"), headers=headers)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-        assert Employee.objects.count() == 0
-        assert CustomUser.objects.count() == 0
+        assert Employee.objects.count() == 3
+        assert CustomUser.objects.count() == 3
         assert "token_not_valid" in response.data["code"]
 
 
@@ -101,8 +101,9 @@ class TestPostEmployees:
         WHEN the employees endpoint is posted to (POST)
         THEN checks that response is 200 and datas are displayed
         """
-        management_employee = employees_users_with_tokens["management_employee"]
-        access_token = management_employee.user.access_token
+        access_token = employees_users_with_tokens[
+            "management_employee"
+        ].user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
         response = api_client.post(
             reverse("employees"), headers=headers, data=self.valid_data, format="json"
@@ -110,19 +111,21 @@ class TestPostEmployees:
         assert response.status_code == status.HTTP_201_CREATED
         assert Employee.objects.count() == 4
         assert CustomUser.objects.count() == 4
-        assert b"7402" in response.content
+        assert "employee_id" in response.data
+        assert 7402 == response.data["employee_number"]
         assert "Nom de test" in response.data["last_name"]
         assert "Prénom de test" in response.data["first_name"]
         assert "MANAGEMENT" in response.data["department"]
-        assert b"testcreateemployee@email.com" in response.content
+        assert b"user_id" in response.content
+        assert "testcreateemployee@email.com" in response.data["user"]["email"]
         assert b"password" not in response.content
-        assert b"is_active" in response.content
-        assert b"is_staff" in response.content
-        assert b"date_joined" in response.content
+        assert True == response.data["user"]["is_active"]  # noqa: E712
+        assert True == response.data["user"]["is_staff"]  # noqa: E712
+        assert "date_joined" in response.data["user"]
         assert "created_at" in response.data
         assert "updated_at" in response.data
 
-    def test_post_employees_failed_with_bad_request(
+    def test_post_employees_route_failed_with_bad_request(
         self, api_client, employees_users_with_tokens
     ):
         """
@@ -130,8 +133,9 @@ class TestPostEmployees:
         WHEN the employees endpoint is posted to (POST)
         THEN checks that response is 400 and error message is displayed
         """
-        management_employee = employees_users_with_tokens["management_employee"]
-        access_token = management_employee.user.access_token
+        access_token = employees_users_with_tokens[
+            "management_employee"
+        ].user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
         response = api_client.post(
             reverse("employees"), headers=headers, data=self.invalid_data, format="json"
@@ -152,7 +156,7 @@ class TestPostEmployees:
         assert "Saisissez une adresse e-mail valide." in response.data["user"]["email"]
         assert "Ce champ est obligatoire." in response.data["user"]["password2"]
 
-    def test_post_employees_failed_with_forbidden(
+    def test_post_employees_route_failed_with_forbidden(
         self, api_client, employees_users_with_tokens
     ):
         """
@@ -160,8 +164,7 @@ class TestPostEmployees:
         WHEN the employees endpoint is posted to (POST)
         THEN checks that response is 403 and error message is displayed
         """
-        support_employee = employees_users_with_tokens["support_employee"]
-        access_token = support_employee.user.access_token
+        access_token = employees_users_with_tokens["support_employee"].user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
         response = api_client.post(
             reverse("employees"), headers=headers, data=self.valid_data, format="json"
@@ -174,7 +177,7 @@ class TestPostEmployees:
             in response.data["detail"]
         )
 
-    def test_post_employees_failed_with_unauthorized(self, db, api_client):
+    def test_post_employees_route_failed_with_unauthorized(self, db, api_client, employees_users_with_tokens):
         """
         GIVEN an invalid token and valid data
         WHEN the employees endpoint is posted to (POST)
@@ -186,6 +189,6 @@ class TestPostEmployees:
             reverse("employees"), headers=headers, data=self.valid_data, format="json"
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-        assert Employee.objects.count() == 0
-        assert CustomUser.objects.count() == 0
+        assert Employee.objects.count() == 3
+        assert CustomUser.objects.count() == 3
         assert "token_not_valid" in response.data["code"]

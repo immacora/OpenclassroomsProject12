@@ -79,8 +79,7 @@ class TestLogout:
         WHEN the logout endpoint is posted to (POST)
         THEN checks that response is 205 (tokens are blacklisted)
         """
-        management_employee = employees_users_with_tokens["management_employee"]
-        access_token = management_employee.user.access_token
+        access_token = employees_users_with_tokens["management_employee"].user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
         response = api_client.post(reverse("logout"), headers=headers)
         assert response.status_code == status.HTTP_205_RESET_CONTENT
@@ -104,8 +103,7 @@ class TestLogout:
         WHEN the logout endpoint is requested (GET)
         THEN checks that response is 405
         """
-        management_employee = employees_users_with_tokens["management_employee"]
-        access_token = management_employee.user.access_token
+        access_token = employees_users_with_tokens["management_employee"].user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
         response = api_client.get(reverse("logout"), headers=headers)
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
@@ -124,8 +122,7 @@ class TestTokenRefresh:
         WHEN the token_refresh endpoint is posted to (POST)
         THEN checks that response is 200 and tokens are displayed
         """
-        management_employee = employees_users_with_tokens["management_employee"]
-        refresh_token = management_employee.user.refresh_token
+        refresh_token = employees_users_with_tokens["management_employee"].user.refresh_token
         data = {"refresh": refresh_token}
         response = api_client.post(reverse("token_refresh"), data=data)
         assert response.status_code == status.HTTP_200_OK
@@ -164,8 +161,7 @@ class TestTokenRefresh:
         WHEN the token_refresh endpoint is requested (GET)
         THEN checks that response is 405
         """
-        management_employee = employees_users_with_tokens["management_employee"]
-        refresh_token = management_employee.user.refresh_token
+        refresh_token = employees_users_with_tokens["management_employee"].user.refresh_token
         data = {"refresh": refresh_token}
         response = api_client.get(reverse("token_refresh"), data=data)
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
