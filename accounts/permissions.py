@@ -4,10 +4,10 @@ from django.contrib.auth.models import Permission
 def add_default_permissions_to_groups(management_group, sales_group, support_group):
     """
     Add each required permission by default to groups.
-    In accordance with company document retention periods,/
-    permissions to delete customer information are not available by default.
-    Only the management_group can access the CRUD of the user and employee models,/
-    add and change contracts, and change_event.
+    In accordance with company document retention periods,
+    permissions to delete client contracts and events are not available by default.
+    Only the management_group can access the CRUD of the user and employee models,
+    add and change contracts, change_client, delete_client and change_event.
     All employees can see location, client, contract and event models.
     Sales_group and support_group can add and change location model.
     Only the sales_group can add client.
@@ -24,9 +24,12 @@ def add_default_permissions_to_groups(management_group, sales_group, support_gro
 
     add_location = Permission.objects.get(codename="add_location")
     change_location = Permission.objects.get(codename="change_location")
+    delete_location = Permission.objects.get(codename="delete_location")
     view_location = Permission.objects.get(codename="view_location")
 
     add_client = Permission.objects.get(codename="add_client")
+    change_client = Permission.objects.get(codename="change_client")
+    delete_client = Permission.objects.get(codename="delete_client")
     view_client = Permission.objects.get(codename="view_client")
 
     add_contract = Permission.objects.get(codename="add_contract")
@@ -46,6 +49,8 @@ def add_default_permissions_to_groups(management_group, sales_group, support_gro
             delete_employee,
             view_employee,
             view_location,
+            change_client,
+            delete_client,
             view_client,
             add_contract,
             change_contract,
@@ -58,6 +63,7 @@ def add_default_permissions_to_groups(management_group, sales_group, support_gro
         [
             add_location,
             change_location,
+            delete_location,
             view_location,
             add_client,
             view_client,
@@ -65,4 +71,14 @@ def add_default_permissions_to_groups(management_group, sales_group, support_gro
             view_event,
         ]
     )
-    support_group.permissions.set([add_location, change_location, view_location])
+    support_group.permissions.set(
+        [
+            add_location,
+            change_location,
+            delete_location,
+            view_location,
+            view_client,
+            view_contract,
+            view_event,
+        ]
+    )
