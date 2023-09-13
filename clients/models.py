@@ -1,6 +1,8 @@
 import uuid
-from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
+from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 
 from helpers.models import TimestampedModel
 from helpers.validators import (
@@ -20,7 +22,10 @@ class Client(TimestampedModel):
         "Nom de l'entreprise", max_length=150, validators=[unicodecharfieldvalidator]
     )
     siren = models.CharField(
-        "Numéro SIREN", max_length=9, unique=True, validators=[digitalcharfieldvalidator]
+        "Numéro SIREN",
+        max_length=9,
+        unique=True,
+        validators=[digitalcharfieldvalidator],
     )
     first_name = models.CharField(
         "Prénom du client",
@@ -40,10 +45,22 @@ class Client(TimestampedModel):
         null=True,
         blank=True,
     )
-    locations = models.ManyToManyField(Location, blank=True)
+    locations = models.ManyToManyField(
+        Location, related_name="client_locations", blank=True
+    )
 
     class Meta:
         ordering = ["company_name"]
 
     def __str__(self):
         return f"Client {self.last_name} {self.first_name} de la société {self.company_name}"
+
+
+@receiver(pre_delete, sender=Client)
+def delete_linked_locations(sender, instance, **kwargs):
+    """Delete client locations if they are not used elsewhere."""
+    locations = instance.locations.all()
+    for location in locations:
+        if location.client_locations.count() == 1:
+            if location.event_locations.count() == 0:
+                location.delete()

@@ -1,8 +1,16 @@
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
-from rest_framework.serializers import ModelSerializer, CharField, ValidationError
+from rest_framework.serializers import (
+    ModelSerializer,
+    CharField,
+    ValidationError,
+    UUIDField,
+    CurrentUserDefault,
+)
 
 from accounts.models import Employee
+from locations.models import Location
+from clients.models import Client
 
 CustomUser = get_user_model()
 
@@ -59,7 +67,7 @@ class CreateEmployeeSerializer(ModelSerializer):
 
 
 class CustomUserDetailSerializer(ModelSerializer):
-    """Serializer with all custom user informations for creation verification."""
+    """Serializer with all custom user informations."""
 
     class Meta:
         model = CustomUser
@@ -68,7 +76,7 @@ class CustomUserDetailSerializer(ModelSerializer):
 
 
 class EmployeeDetailSerializer(ModelSerializer):
-    """Serializer with all informations for Epic Events employees detail."""
+    """Serializer with all Epic Events employee informations."""
 
     user = CustomUserDetailSerializer()
 
@@ -114,3 +122,61 @@ class EmployeeListSerializer(ModelSerializer):
             "user",
         )
         read_only__fields = "employee_id"
+
+
+class LocationDetailSerializer(ModelSerializer):
+    """Serializer with all location informations."""
+
+    class Meta:
+        model = Location
+        fields = (
+            "location_id",
+            "street_number",
+            "street_name",
+            "city",
+            "zip_code",
+            "country",
+        )
+        read_only__fields = "location_id"
+
+
+class ClientDetailSerializer(ModelSerializer):
+    """
+    Serializer with all client informations including location.
+    Assigns the default sales_contact (logged-in user).
+    """
+
+    sales_contact = UUIDField(default=CurrentUserDefault())
+    locations = LocationDetailSerializer(many=True)
+
+    class Meta:
+        model = Client
+        fields = (
+            "client_id",
+            "company_name",
+            "siren",
+            "first_name",
+            "last_name",
+            "email",
+            "phone_number",
+            "sales_contact",
+            "locations",
+            "created_at",
+            "updated_at",
+        )
+        read_only__fields = "client_id", "sales_contact", "created_at", "updated_at"
+
+
+class ClientListSerializer(ModelSerializer):
+    """Serializer with minimal informations for client list."""
+
+    class Meta:
+        model = Client
+        fields = (
+            "client_id",
+            "company_name",
+            "sales_contact",
+            "created_at",
+            "updated_at",
+        )
+        read_only__fields = "client_id", "created_at", "updated_at"

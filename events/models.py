@@ -1,5 +1,7 @@
 import uuid
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 
 from contracts.models import Contract
 from accounts.models import Employee
@@ -37,7 +39,19 @@ class Event(TimestampedModel):
         null=True,
         blank=True,
     )
-    locations = models.ManyToManyField(Location)
+    locations = models.ManyToManyField(
+        Location, related_name="event_locations", blank=True
+    )
 
     def __str__(self):
         return f"Événement {self.event_name} pour le client {self.contract.client} géré par {self.support_contact}"
+
+
+@receiver(pre_delete, sender=Event)
+def delete_linked_locations(sender, instance, **kwargs):
+    """Delete event locations if they are not used elsewhere."""
+    locations = instance.locations.all()
+    for location in locations:
+        if location.event_locations.count() == 1:
+            if location.client_locations.count() == 0:
+                location.delete()
