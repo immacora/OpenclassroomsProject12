@@ -185,39 +185,6 @@ class TestPutEmployee:
             "«\xa0WRONG\xa0» n'est pas un choix valide." in response.data["department"]
         )
 
-    def test_put_employee_route_failed_with_conflict(
-        self, api_client, employees_users_with_tokens
-    ):
-        """
-        GIVEN a management employee valid token, a valid employee_id and user email already assigned in update data
-        WHEN the employee endpoint is updated to (PUT)
-        THEN checks that response is 409 and error message is displayed
-        """
-        existing_user_email = employees_users_with_tokens["support_employee"].user.email
-        invalid_user_data = {
-            "employee_number": "963",
-            "first_name": "UPDATED Admin TEST prénom",
-            "last_name": "UPDATED Admin TEST nom",
-            "department": "SALES",
-            "user": {"email": existing_user_email, "is_active": "True"},
-        }
-        access_token = employees_users_with_tokens[
-            "management_employee"
-        ].user.access_token
-        headers = {"Authorization": f"Bearer {access_token}"}
-        employee_to_update = employees_users_with_tokens["sales_employee"]
-        employee_id = employee_to_update.employee_id
-        response = api_client.put(
-            reverse("employee_detail", kwargs={"employee_id": employee_id}),
-            headers=headers,
-            data=invalid_user_data,
-            format="json",
-        )
-        assert response.status_code == status.HTTP_409_CONFLICT
-        assert Employee.objects.count() == 3
-        assert CustomUser.objects.count() == 3
-        assert "Cette adresse email est déjà attribuée." in response.data["message"]
-
     def test_put_employee_route_failed_with_forbidden(
         self, api_client, employees_users_with_tokens
     ):

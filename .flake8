@@ -4,6 +4,7 @@ exclude=
     __pycache__,
 
     .gitignore,
+    .coveragerc,
     .venv/,
     documentation/,
     config/settings/,

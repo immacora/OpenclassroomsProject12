@@ -18,5 +18,8 @@ class Contract(TimestampedModel):
         verbose_name="Client",
     )
 
+    class Meta:
+        ordering = ["-is_signed"]
+
     def __str__(self):
         return f"Contrat du client {self.client}"

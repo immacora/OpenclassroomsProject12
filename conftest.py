@@ -1,11 +1,20 @@
 import pytest
 from pytest_factoryboy import register
-from tests.factories import CustomUserFactory, EmployeeFactory
+from tests.factories import (
+    CustomUserFactory,
+    EmployeeFactory,
+    LocationFactory,
+    SalesContactFactory,
+    ClientFactory,
+)
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
 register(CustomUserFactory)
 register(EmployeeFactory)
+register(LocationFactory)
+register(SalesContactFactory)
+register(ClientFactory)
 
 
 @pytest.fixture
@@ -50,3 +59,23 @@ def employees_users_with_tokens(db, employee_factory):
         "sales_employee": sales_employee,
         "support_employee": support_employee,
     }
+
+
+@pytest.fixture
+def new_location(db, location_factory):
+    location = location_factory.create()
+    return location
+
+
+@pytest.fixture
+def new_sales_contact(db, sales_contact_factory):
+    sales_contact = sales_contact_factory.create()
+    return sales_contact
+
+
+@pytest.fixture
+def new_client(db, client_factory, location_factory):
+    client = client_factory.create()
+    location = location_factory.create()
+    client.locations.add(location)
+    return client

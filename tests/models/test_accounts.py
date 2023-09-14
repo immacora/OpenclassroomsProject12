@@ -24,6 +24,7 @@ class TestCreateUsers:
             does not have permission.
         """
         assert CustomUser.objects.count() == 1
+        assert new_custom_user.email is not None
         assert new_custom_user.is_active
         assert new_custom_user.is_staff is False
         assert new_custom_user.is_superuser is False
@@ -45,13 +46,7 @@ class TestCreateUsers:
         assert new_superuser.is_superuser
 
 
-class TestCreateEmployees:
-    """
-    GIVEN a new_employee fixture
-    WHEN an employee from each department is created
-    THEN checks that the department, its group and permissions are ok
-    """
-
+class TestEmployees:
     def test_create_management_employee(self, new_employee):
         """
         Tests if MANAGEMENT employee creation :
@@ -66,20 +61,22 @@ class TestCreateEmployees:
         assert new_employee.user.is_superuser is False
         assert str(new_employee.user.groups.get()) == "management"
         assert new_employee.user.get_all_permissions() == {
-            "contracts.view_contract",
-            "clients.view_client",
-            "contracts.add_contract",
             "accounts.add_customuser",
+            "accounts.change_customuser",
+            "accounts.view_customuser",
+            "accounts.add_employee",
             "accounts.change_employee",
             "accounts.delete_employee",
-            "accounts.add_employee",
-            "events.change_event",
-            "accounts.change_customuser",
-            "events.view_event",
             "accounts.view_employee",
             "locations.view_location",
+            "clients.change_client",
+            "clients.delete_client",
+            "clients.view_client",
+            "contracts.add_contract",
             "contracts.change_contract",
-            "accounts.view_customuser",
+            "contracts.view_contract",
+            "events.change_event",
+            "events.view_event",
         }
 
     def test_create_sales_employee(self, new_employee):
@@ -96,12 +93,13 @@ class TestCreateEmployees:
         assert new_employee.user.is_superuser is False
         assert str(new_employee.user.groups.get()) == "sales"
         assert new_employee.user.get_all_permissions() == {
+            "locations.add_location",
             "locations.change_location",
+            "locations.delete_location",
             "locations.view_location",
             "clients.add_client",
             "clients.view_client",
             "contracts.view_contract",
-            "locations.add_location",
             "events.view_event",
         }
 
@@ -119,9 +117,13 @@ class TestCreateEmployees:
         assert new_employee.user.is_superuser is False
         assert str(new_employee.user.groups.get()) == "support"
         assert new_employee.user.get_all_permissions() == {
-            "locations.change_location",
             "locations.add_location",
+            "locations.change_location",
+            "locations.delete_location",
             "locations.view_location",
+            "clients.view_client",
+            "contracts.view_contract",
+            "events.view_event",
         }
 
     def test_create_employee_with_not_unique_number_raises_error(
@@ -147,3 +149,10 @@ class TestCreateEmployees:
                 department="SALES",
                 user=new_employee.user,
             )
+
+    def test_delete_employee_and_his_user(self, new_employee):
+        """Tests if employees deletion delete his linked user.."""
+
+        new_employee.delete()
+        assert Employee.objects.count() == 0
+        assert CustomUser.objects.count() == 0

@@ -106,6 +106,13 @@ py manage.py runserver
 
 In the API, the creation, update and deletion of a user are linked to that of the employee. You must perform these actions via the employee account.
 
+### Optional
+
+If you want to pre-populate the database with accounts, clients, contacts and events, to test the API endpoints, load sample data as follows (user passwords are the same as adminTEST):
+
+```sh
+py manage.py loaddata fixtures/datas.json
+```
 
 ## Postman Documentation
 
