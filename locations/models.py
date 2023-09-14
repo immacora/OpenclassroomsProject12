@@ -27,7 +27,6 @@ class Location(models.Model):
     )
 
     class Meta:
-        unique_together = ("street_number", "street_name", "city")
         ordering = ["zip_code"]
 
     def __str__(self):

@@ -10,9 +10,10 @@ from rest_framework.generics import (
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
 
+from clients.permissions import IsSalesContact
 from helpers.functions import add_locations_to_model
-from clients.models import Client
 from accounts.models import Employee
+from clients.models import Client
 from .serializers import (
     CreateEmployeeSerializer,
     CustomUserDetailSerializer,
@@ -138,3 +139,44 @@ class ClientListAPIView(ListCreateAPIView):
             {"details": "Vous n'avez pas la permission d'effectuer cette action."},
             status=status.HTTP_403_FORBIDDEN,
         )
+
+
+class ClientDetailAPIView(RetrieveUpdateDestroyAPIView):
+    """
+    Get Epic Events client detail with their related locations via id.
+    Edit client and add location.
+    Delete client and their locations if not used by others.
+
+    Permission : requesting user authenticated and IsAdminUser or IsSalesContact.
+    """
+
+    permission_classes = [IsAdminUser | IsAuthenticated & IsSalesContact]
+    serializer_class = ClientDetailSerializer
+
+    def get_object(self):
+        client_id = self.kwargs["client_id"]
+        obj = get_object_or_404(Client, client_id=client_id)
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", True)
+        instance = self.get_object()
+        data = request.data
+
+        if "sales_contact" in data:
+            return Response(
+                {"details": "Vous ne pouvez pas modifier le commercial attribué."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+
+        if serializer.is_valid(raise_exception=True):
+            if "locations" in data:
+                location_data = serializer.validated_data.pop("locations")
+                add_locations_to_model(instance, location_data)
+                self.perform_update(serializer)
+                return Response(serializer.data)
+            self.perform_update(serializer)
+
+        return Response(serializer.data)

@@ -6,6 +6,7 @@ from .views import (
     EmployeeListAPIView,
     EmployeeDetailAPIView,
     ClientListAPIView,
+    ClientDetailAPIView,
 )
 
 
@@ -20,4 +21,9 @@ urlpatterns = [
         name="employee_detail",
     ),
     path("clients/", ClientListAPIView.as_view(), name="clients"),
+    path(
+        "clients/<uuid:client_id>/",
+        ClientDetailAPIView.as_view(),
+        name="client_id",
+    ),
 ]
