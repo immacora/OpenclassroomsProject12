@@ -1,7 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import (
@@ -12,11 +10,16 @@ from rest_framework.generics import (
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
 
+from helpers.functions import add_locations_to_model
+from clients.models import Client
 from accounts.models import Employee
 from .serializers import (
     CreateEmployeeSerializer,
+    CustomUserDetailSerializer,
     EmployeeListSerializer,
     EmployeeDetailSerializer,
+    ClientListSerializer,
+    ClientDetailSerializer,
 )
 
 CustomUser = get_user_model()
@@ -82,37 +85,56 @@ class EmployeeDetailAPIView(RetrieveUpdateDestroyAPIView):
 
         if "user" in data:
             user_data = data.pop("user")
+            user_serializer = CustomUserDetailSerializer(data=user_data)
+            user_serializer.is_valid(raise_exception=True)
             user_to_update = instance.user
 
             if "is_active" in user_data:
-                new_user_status = user_data["is_active"]
-                try:
-                    user_to_update.is_active = new_user_status
-                    user_to_update.save()
-                except ValidationError as e:
-                    return Response({"details": e}, status=status.HTTP_400_BAD_REQUEST)
-            if "email" in user_data:
-                new_user_email = user_data["email"]
+                user_to_update.is_active = user_data["is_active"]
 
-                if user_to_update.email != new_user_email:
-                    try:
-                        validate_email(new_user_email)
-                    except ValidationError as e:
-                        return Response(
-                            {"details": e}, status=status.HTTP_400_BAD_REQUEST
-                        )
-                    else:
-                        if CustomUser.objects.filter(email=new_user_email).exists():
-                            return Response(
-                                {"message": "Cette adresse email est déjà attribuée."},
-                                status=status.HTTP_409_CONFLICT,
-                            )
-                        else:
-                            user_to_update.email = new_user_email
-                            user_to_update.save()
+            if "email" in user_data:
+                user_to_update.email = user_data["email"]
+
+            user_to_update.save()
 
         serializer = self.get_serializer(instance, data=data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
         return Response(serializer.data)
+
+
+class ClientListAPIView(ListCreateAPIView):
+    """
+    Get Epic Events client list (permission all authenticated employees).
+    Create client, their location(s) and sales_contact to which is added the change_client permission
+    if the requesting user IsAuthenticated and has add_client permission.
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ClientListSerializer
+    queryset = Client.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        if request.user.has_perm("clients.add_client"):
+            serializer = ClientDetailSerializer(
+                context={"request": request}, data=request.data
+            )
+            if serializer.is_valid(raise_exception=True):
+                location_data = serializer.validated_data.pop("locations")
+                author_user = serializer.validated_data.pop("sales_contact")
+                client = Client.objects.create(
+                    sales_contact=author_user.employee, **serializer.validated_data
+                )
+                add_locations_to_model(client, location_data)
+                client_data = ClientDetailSerializer(client).data
+
+                return Response(client_data, status=status.HTTP_201_CREATED)
+
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST, *args, **kwargs
+            )
+        return Response(
+            {"details": "Vous n'avez pas la permission d'effectuer cette action."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
