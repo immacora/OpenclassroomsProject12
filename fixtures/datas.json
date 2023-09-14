@@ -1,0 +1,287 @@
+[
+  {
+    "model": "accounts.customuser",
+    "pk": "15dcc272-8d1d-4420-89d0-b4508cd5112a",
+    "fields": {
+      "password": "pbkdf2_sha256$600000$pvlfhKbGTfwI1ewQUIBe4d$bBTlo55HiFKy48F/cDWRL/eU/s9rC9h+cXfBoijZDtw=",
+      "last_login": null,
+      "is_superuser": false,
+      "first_name": "",
+      "last_name": "",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2023-08-22T07:22:20.456Z",
+      "email": "admin1@email.com",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "accounts.customuser",
+    "pk": "d2252702-4bcf-461e-a4e2-500cd2aa71fd",
+    "fields": {
+      "password": "pbkdf2_sha256$600000$tqNWwBWhhbZqwP41qPgKDN$6FMGIbgORG+TnIFKOdjQP35F4BbxxBuToMJx30liFqA=",
+      "last_login": null,
+      "is_superuser": false,
+      "first_name": "",
+      "last_name": "",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2023-08-22T07:43:35.890Z",
+      "email": "admin2@email.com",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "accounts.customuser",
+    "pk": "18a002df-e5a9-4658-b346-ea1a996e003a",
+    "fields": {
+      "password": "pbkdf2_sha256$600000$jIisiqkC4oSrsh5LSNI4gf$mftuj27N+dVEZo0Orrw3u3yLKVfd68KWC5spR0KTVx0=",
+      "last_login": null,
+      "is_superuser": false,
+      "first_name": "",
+      "last_name": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2023-08-22T07:45:07.836Z",
+      "email": "commercial1@email.com",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "accounts.customuser",
+    "pk": "0a030478-5dc8-4af0-aada-e1720b7e7dc8",
+    "fields": {
+      "password": "pbkdf2_sha256$600000$DJDKBM8Fl5ve9RGshHOe2h$t4ooeH8iSaLbwXfFjAUwd76E7Ti96BzIA1CR31yLndc=",
+      "last_login": null,
+      "is_superuser": false,
+      "first_name": "",
+      "last_name": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2023-08-22T07:47:14.464Z",
+      "email": "commercial2@email.com",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "accounts.customuser",
+    "pk": "17d0c687-ab3d-4b3c-91b7-5d14e5f4034d",
+    "fields": {
+      "password": "pbkdf2_sha256$600000$tFL8njLBKFY5Rrj7D9yXRx$yiD7ZxCCleW9mj8SnLaxxaS/U45OSHI9xledD08S5vc=",
+      "last_login": null,
+      "is_superuser": false,
+      "first_name": "",
+      "last_name": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2023-08-22T07:50:22.146Z",
+      "email": "support1@email.com",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "accounts.customuser",
+    "pk": "4cd38ca9-8428-4592-8e87-f0bbe50a4f96",
+    "fields": {
+      "password": "pbkdf2_sha256$600000$tLnfsiIG97DGLFz0kjddPM$MgxmwKEjbitNm9sIVgfopAAGGrj/ADvbdRWSV0CEpqA=",
+      "last_login": null,
+      "is_superuser": false,
+      "first_name": "",
+      "last_name": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2023-08-22T07:51:19.524Z",
+      "email": "support2@email.com",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "accounts.employee",
+    "pk": "a294a9af-dbf3-4da0-9f91-3b540b9462d0",
+    "fields": {
+      "created_at": "2023-08-22T07:22:23.898Z",
+      "updated_at": "2023-08-22T07:22:23.898Z",
+      "employee_number": 1,
+      "first_name": "Prénom admin UN",
+      "last_name": "Nom admin UN",
+      "department": "MANAGEMENT",
+      "user": "15dcc272-8d1d-4420-89d0-b4508cd5112a"
+    }
+  },
+  {
+    "model": "accounts.employee",
+    "pk": "8e930b75-0703-45cc-be4b-c5ee13454248",
+    "fields": {
+      "created_at": "2023-08-22T07:44:07.951Z",
+      "updated_at": "2023-08-22T07:44:07.951Z",
+      "employee_number": 2,
+      "first_name": "Prénom admin DEUX",
+      "last_name": "Nom admin DEUX",
+      "department": "MANAGEMENT",
+      "user": "d2252702-4bcf-461e-a4e2-500cd2aa71fd"
+    }
+  },
+  {
+    "model": "accounts.employee",
+    "pk": "1a99f054-8e33-4719-8ab3-d2249a3051dd",
+    "fields": {
+      "created_at": "2023-08-22T07:45:12.909Z",
+      "updated_at": "2023-08-22T07:45:12.909Z",
+      "employee_number": 3,
+      "first_name": "Prénom commercial UN",
+      "last_name": "Nom commercial UN",
+      "department": "SALES",
+      "user": "18a002df-e5a9-4658-b346-ea1a996e003a"
+    }
+  },
+  {
+    "model": "accounts.employee",
+    "pk": "96fd8688-4fdb-4928-a225-ed4e1850768e",
+    "fields": {
+      "created_at": "2023-08-22T07:47:21.289Z",
+      "updated_at": "2023-08-22T07:47:21.289Z",
+      "employee_number": 4,
+      "first_name": "Prénom commercial DEUX",
+      "last_name": "Nom commercial DEUX",
+      "department": "SALES",
+      "user": "0a030478-5dc8-4af0-aada-e1720b7e7dc8"
+    }
+  },
+  {
+    "model": "accounts.employee",
+    "pk": "e5c776bc-0bd0-47aa-b53c-515382d4fa9d",
+    "fields": {
+      "created_at": "2023-08-22T07:50:26.397Z",
+      "updated_at": "2023-08-22T07:50:26.397Z",
+      "employee_number": 5,
+      "first_name": "Prénom support UN",
+      "last_name": "Nom support UN",
+      "department": "SUPPORT",
+      "user": "17d0c687-ab3d-4b3c-91b7-5d14e5f4034d"
+    }
+  },
+  {
+    "model": "accounts.employee",
+    "pk": "672849d2-31a8-4037-8eab-c2def37c986c",
+    "fields": {
+      "created_at": "2023-08-22T07:55:28.735Z",
+      "updated_at": "2023-08-22T07:55:28.735Z",
+      "employee_number": 6,
+      "first_name": "Prénom support DEUX",
+      "last_name": "Nom support DEUX",
+      "department": "SUPPORT",
+      "user": "4cd38ca9-8428-4592-8e87-f0bbe50a4f96"
+    }
+  },
+  {
+    "model": "locations.location",
+    "pk": "a328ac61-6338-4f51-8b43-4e765673fdc0",
+    "fields": {
+      "street_number": 1,
+      "street_name": "Rue du lieu 1",
+      "city": "VILLE-DU-LIEU",
+      "zip_code": "01000",
+      "country": "FRANCE"
+    }
+  },
+  {
+    "model": "locations.location",
+    "pk": "16f85f01-89b9-4663-80cb-de2e14233edd",
+    "fields": {
+      "street_number": 2,
+      "street_name": "Rue du lieu 2",
+      "city": "VILLE-DU-LIEU",
+      "zip_code": "02400",
+      "country": "FRANCE"
+    }
+  },
+  {
+    "model": "locations.location",
+    "pk": "c28e70d3-b708-4af9-b3f3-0b364baf9d34",
+    "fields": {
+      "street_number": 3,
+      "street_name": "Rue du lieu 3",
+      "city": "VILLE-DU-LIEU",
+      "zip_code": "78600",
+      "country": "FRANCE"
+    }
+  },
+  {
+    "model": "clients.client",
+    "pk": "d25ac733-7c9e-4ab1-a4ee-236d8f3c2b6b",
+    "fields": {
+      "created_at": "2023-09-12T15:09:38.084Z",
+      "updated_at": "2023-09-12T15:09:38.084Z",
+      "company_name": "Entreprise 1",
+      "siren": "123456789",
+      "first_name": "Prénom du client UN",
+      "last_name": "Nom du client UN",
+      "email": "client1@email.com",
+      "phone_number": "+33654872369",
+      "sales_contact": "1a99f054-8e33-4719-8ab3-d2249a3051dd",
+      "locations": [
+        "a328ac61-6338-4f51-8b43-4e765673fdc0"
+      ]
+    }
+  },
+  {
+    "model": "clients.client",
+    "pk": "c08227f5-5101-4044-ac72-ceb57d8f16c4",
+    "fields": {
+      "created_at": "2023-09-12T14:58:50.317Z",
+      "updated_at": "2023-09-12T14:58:50.317Z",
+      "company_name": "Entreprise 2",
+      "siren": "156478923",
+      "first_name": "Prénom du client DEUX",
+      "last_name": "Nom du client DEUX",
+      "email": "client2@email.com",
+      "phone_number": "+33665872154",
+      "sales_contact": "1a99f054-8e33-4719-8ab3-d2249a3051dd",
+      "locations": [
+        "16f85f01-89b9-4663-80cb-de2e14233edd"
+      ]
+    }
+  },
+  {
+    "model": "clients.client",
+    "pk": "fe97dbe4-789b-4bef-95c3-52b5c0d12615",
+    "fields": {
+      "created_at": "2023-09-12T14:59:56.837Z",
+      "updated_at": "2023-09-12T14:59:56.837Z",
+      "company_name": "Entreprise 3",
+      "siren": "695487123",
+      "first_name": "Prénom du client TROIS",
+      "last_name": "Nom du client TROIS",
+      "email": "client3@email.com",
+      "phone_number": "+33684732965",
+      "sales_contact": "1a99f054-8e33-4719-8ab3-d2249a3051dd",
+      "locations": [
+        "c28e70d3-b708-4af9-b3f3-0b364baf9d34"
+      ]
+    }
+  },
+  {
+    "model": "clients.client",
+    "pk": "e8685975-02c3-4389-8cf8-70d9c1a90adb",
+    "fields": {
+      "created_at": "2023-09-13T15:25:11.121Z",
+      "updated_at": "2023-09-13T15:25:11.121Z",
+      "company_name": "Entreprise TEST",
+      "siren": "985163274",
+      "first_name": "Prénom du client TEST",
+      "last_name": "Nom du client TEST",
+      "email": "clientTEST@email.com",
+      "phone_number": "+33600000000",
+      "sales_contact": "1a99f054-8e33-4719-8ab3-d2249a3051dd",
+      "locations": [
+        "a328ac61-6338-4f51-8b43-4e765673fdc0"
+      ]
+    }
+  }
+]
