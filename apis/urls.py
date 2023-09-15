@@ -24,6 +24,6 @@ urlpatterns = [
     path(
         "clients/<uuid:client_id>/",
         ClientDetailAPIView.as_view(),
-        name="client_id",
+        name="client_detail",
     ),
 ]

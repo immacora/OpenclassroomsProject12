@@ -78,4 +78,7 @@ def new_client(db, client_factory, location_factory):
     client = client_factory.create()
     location = location_factory.create()
     client.locations.add(location)
+    refresh = RefreshToken.for_user(client.sales_contact.user)
+    client.sales_contact.user.access_token = str(refresh.access_token)
+    client.sales_contact.user.refresh_token = str(refresh)
     return client

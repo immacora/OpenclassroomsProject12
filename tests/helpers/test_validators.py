@@ -30,7 +30,7 @@ class TestValidators:
                 unicodealphavalidator(input_str)
 
     def test_unicodecharfieldvalidator(self):
-        """Checks that the return contains only alphanumeric characters with apostrophe,\
+        """Checks that the return contains only alphanumeric characters with apostrophe,
         hyphen, @, point and space."""
 
         # Valid input

@@ -38,7 +38,7 @@ class LocationFactory(factory.django.DjangoModelFactory):
     street_number = FuzzyInteger(1, 876)
     street_name = factory.LazyAttribute(lambda _: fake.street_name())
     city = factory.LazyAttribute(lambda _: fake.city())
-    zip_code = factory.Sequence(lambda n: '{:05}'.format(random.randrange(100000)))
+    zip_code = factory.Sequence(lambda n: "{:05}".format(random.randrange(100000)))
     country = fake.country()
 
 
@@ -46,7 +46,7 @@ class SalesContactFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Employee
 
-    employee_number = factory.Sequence(lambda n: n)
+    employee_number = factory.Sequence(lambda n: n + 10)
     first_name = factory.LazyAttribute(lambda _: fake.first_name())
     last_name = factory.LazyAttribute(lambda _: fake.last_name())
     department = "SALES"
@@ -58,13 +58,15 @@ class ClientFactory(factory.django.DjangoModelFactory):
         model = Client
 
     company_name = factory.LazyAttribute(lambda _: fake.street_name())
-    siren = factory.Sequence(lambda n: n)
+    siren = factory.Sequence(lambda n: "{:09}".format(random.randrange(1000000000)))
     first_name = factory.LazyAttribute(lambda _: fake.first_name())
     last_name = factory.LazyAttribute(lambda _: fake.last_name())
     email = factory.Sequence(lambda n: "client{}@test.com".format(n))
     phone_number = fake.phone_number()
     sales_contact = factory.SubFactory(SalesContactFactory)
-    locations = factory.RelatedFactoryList(LocationFactory, factory_related_name='client_locations')
+    locations = factory.RelatedFactoryList(
+        LocationFactory, factory_related_name="client_locations"
+    )
 
     @factory.post_generation
     def locations(self, create, extracted, **kwargs):

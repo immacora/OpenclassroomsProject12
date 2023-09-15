@@ -43,8 +43,7 @@ class TestGetEmployee:
         assert employee_to_get.user.is_active == response.data["user"]["is_active"]
         assert employee_to_get.user.is_staff == response.data["user"]["is_staff"]
         assert "date_joined" in response.data["user"]
-        assert "created_at" in response.data
-        assert "updated_at" in response.data
+        assert response.data["created_at"] == response.data["updated_at"]
 
     def test_get_employee_route_failed_with_forbidden(
         self, api_client, employees_users_with_tokens
@@ -91,6 +90,23 @@ class TestGetEmployee:
         assert Employee.objects.count() == 3
         assert CustomUser.objects.count() == 3
         assert "token_not_valid" in response.data["code"]
+
+    def test_get_employee_route_failed_with_not_found(
+        self, api_client, employees_users_with_tokens
+    ):
+        """
+        GIVEN a management employee valid token and a invalid employee_id
+        WHEN the employee endpoint is requested (GET)
+        THEN checks that response is 404 and error message is displayed
+        """
+        access_token = employees_users_with_tokens[
+            "management_employee"
+        ].user.access_token
+        headers = {"Authorization": f"Bearer {access_token}"}
+        response = api_client.get("api/employees/1234/", headers=headers)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert Employee.objects.count() == 3
+        assert CustomUser.objects.count() == 3
 
 
 class TestPutEmployee:
@@ -146,8 +162,7 @@ class TestPutEmployee:
         assert False == response.data["user"]["is_active"]  # noqa: E712
         assert False == response.data["user"]["is_staff"]  # noqa: E712
         assert "date_joined" in response.data["user"]
-        assert "created_at" in response.data
-        assert "updated_at" in response.data
+        assert response.data["created_at"] != response.data["updated_at"]
 
     def test_put_employee_route_failed_with_bad_request(
         self, api_client, employees_users_with_tokens
@@ -239,7 +254,7 @@ class TestDeleteEmployee:
     """
     GIVEN fixture for employees with their associated users and tokens
     WHEN user tries to delete an employee and his linked user via id
-    THEN checks that the response is valid and data are displayed
+    THEN checks that the response is valid
     """
 
     def test_delete_employee_route_success(
@@ -308,20 +323,3 @@ class TestDeleteEmployee:
         assert Employee.objects.count() == 3
         assert CustomUser.objects.count() == 3
         assert "token_not_valid" in response.data["code"]
-
-    def test_delete_employee_route_failed_with_not_found(
-        self, api_client, employees_users_with_tokens
-    ):
-        """
-        GIVEN a management employee valid token and a invalid employee_id
-        WHEN the employee endpoint is deleted (DEL)
-        THEN checks that response is 404 and error message is displayed
-        """
-        access_token = employees_users_with_tokens[
-            "management_employee"
-        ].user.access_token
-        headers = {"Authorization": f"Bearer {access_token}"}
-        response = api_client.delete("api/employees/1234/", headers=headers)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert Employee.objects.count() == 3
-        assert CustomUser.objects.count() == 3

@@ -52,7 +52,9 @@ class TestGetEmployees:
             in response.data["detail"]
         )
 
-    def test_get_employees_route_failed_with_unauthorized(self, api_client, employees_users_with_tokens):
+    def test_get_employees_route_failed_with_unauthorized(
+        self, api_client, employees_users_with_tokens
+    ):
         """
         GIVEN an invalid token
         WHEN the employees endpoint is requested (GET)
@@ -122,8 +124,7 @@ class TestPostEmployees:
         assert True == response.data["user"]["is_active"]  # noqa: E712
         assert True == response.data["user"]["is_staff"]  # noqa: E712
         assert "date_joined" in response.data["user"]
-        assert "created_at" in response.data
-        assert "updated_at" in response.data
+        assert response.data["created_at"] == response.data["updated_at"]
 
     def test_post_employees_route_failed_with_bad_request(
         self, api_client, employees_users_with_tokens
@@ -177,7 +178,9 @@ class TestPostEmployees:
             in response.data["detail"]
         )
 
-    def test_post_employees_route_failed_with_unauthorized(self, db, api_client, employees_users_with_tokens):
+    def test_post_employees_route_failed_with_unauthorized(
+        self, db, api_client, employees_users_with_tokens
+    ):
         """
         GIVEN an invalid token and valid data
         WHEN the employees endpoint is posted to (POST)
