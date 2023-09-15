@@ -28,8 +28,8 @@ class TestGetEmployees:
         assert response.status_code == status.HTTP_200_OK
         assert Employee.objects.count() == 3
         assert CustomUser.objects.count() == 3
-        assert "count" in response.data
-        assert "results" in response.data
+        assert 3 == response.data["count"]
+        assert len(response.data["results"]) == 3
 
     def test_get_employees_route_failed_with_forbidden(
         self, api_client, employees_users_with_tokens

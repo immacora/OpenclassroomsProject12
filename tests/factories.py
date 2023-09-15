@@ -46,7 +46,7 @@ class SalesContactFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Employee
 
-    employee_number = factory.Sequence(lambda n: n + 10)
+    employee_number = factory.Sequence(lambda n: n + 100)
     first_name = factory.LazyAttribute(lambda _: fake.first_name())
     last_name = factory.LazyAttribute(lambda _: fake.last_name())
     department = "SALES"
