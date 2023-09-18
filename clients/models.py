@@ -56,6 +56,9 @@ class Client(TimestampedModel):
     def __str__(self):
         return f"Client {self.last_name} {self.first_name} de la société {self.company_name}"
 
+    def has_signed_contracts(self):
+        return self.contract_set.filter(is_signed=True).exists()
+
 
 @receiver(pre_delete, sender=Client)
 def delete_linked_locations(sender, instance, **kwargs):

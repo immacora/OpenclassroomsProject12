@@ -218,3 +218,13 @@ class ClientDetailAPIView(RetrieveUpdateDestroyAPIView):
                     return Response(serializer.data)
                 self.perform_update(serializer)
             return Response(serializer.data)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.has_signed_contracts():
+            return Response(
+                {"details": "Vous ne pouvez pas supprimer un client dont au moins un contrat est signé."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        else:
+            return self.destroy(request, *args, **kwargs)
