@@ -6,11 +6,13 @@ from rest_framework.serializers import (
     ValidationError,
     UUIDField,
     CurrentUserDefault,
+    BooleanField,
 )
 
 from accounts.models import Employee
 from locations.models import Location
 from clients.models import Client
+from contracts.models import Contract
 
 CustomUser = get_user_model()
 
@@ -143,10 +145,13 @@ class LocationDetailSerializer(ModelSerializer):
 class ClientDetailSerializer(ModelSerializer):
     """
     Serializer with all client informations including location.
-    Assigns the default sales_contact (logged-in user).
+    Assigns the default sales_contact (logged-in user) during creation.
+    Update sales_contact (MANAGEMENT ONLY) with updated_sales_contact write_only field.
     """
 
     sales_contact = UUIDField(default=CurrentUserDefault())
+    updated_sales_contact = UUIDField(write_only=True, required=False)
+    add_contract = BooleanField(write_only=True, required=False)
     locations = LocationDetailSerializer(many=True)
 
     class Meta:
@@ -159,7 +164,10 @@ class ClientDetailSerializer(ModelSerializer):
             "last_name",
             "email",
             "phone_number",
+            "contract_requested",
             "sales_contact",
+            "updated_sales_contact",
+            "add_contract",
             "locations",
             "created_at",
             "updated_at",
@@ -168,7 +176,7 @@ class ClientDetailSerializer(ModelSerializer):
 
 
 class ClientListSerializer(ModelSerializer):
-    """Serializer with minimal informations for client list."""
+    """Serializer with minimal informations for clients list."""
 
     class Meta:
         model = Client
@@ -176,7 +184,43 @@ class ClientListSerializer(ModelSerializer):
             "client_id",
             "company_name",
             "sales_contact",
+            "contract_requested",
             "created_at",
             "updated_at",
         )
         read_only__fields = "client_id", "created_at", "updated_at"
+
+
+class ContractDetailSerializer(ModelSerializer):
+    """Serializer with all contract informations."""
+
+    client = ClientListSerializer()
+
+    class Meta:
+        model = Contract
+        fields = (
+            "contract_id",
+            "contract_description",
+            "amount",
+            "payment_due",
+            "is_signed",
+            "client",
+            "created_at",
+            "updated_at",
+        )
+        read_only__fields = "client_id", "created_at", "updated_at"
+
+
+class ContractListSerializer(ModelSerializer):
+    """Serializer with minimal informations for contracts list."""
+
+    class Meta:
+        model = Client
+        fields = (
+            "contract_id",
+            "is_signed",
+            "client",
+            "created_at",
+            "updated_at",
+        )
+        read_only__fields = "contract_id", "created_at", "updated_at"

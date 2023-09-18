@@ -224,6 +224,7 @@
       "last_name": "Nom du client UN",
       "email": "client1@email.com",
       "phone_number": "+33654872369",
+      "contract_requested": true,
       "sales_contact": "1a99f054-8e33-4719-8ab3-d2249a3051dd",
       "locations": [
         "a328ac61-6338-4f51-8b43-4e765673fdc0"
@@ -242,7 +243,8 @@
       "last_name": "Nom du client DEUX",
       "email": "client2@email.com",
       "phone_number": "+33665872154",
-      "sales_contact": "1a99f054-8e33-4719-8ab3-d2249a3051dd",
+      "contract_requested": false,
+      "sales_contact": "96fd8688-4fdb-4928-a225-ed4e1850768e",
       "locations": [
         "16f85f01-89b9-4663-80cb-de2e14233edd"
       ]
@@ -260,7 +262,8 @@
       "last_name": "Nom du client TROIS",
       "email": "client3@email.com",
       "phone_number": "+33684732965",
-      "sales_contact": "1a99f054-8e33-4719-8ab3-d2249a3051dd",
+      "contract_requested": false,
+      "sales_contact": "96fd8688-4fdb-4928-a225-ed4e1850768e",
       "locations": [
         "c28e70d3-b708-4af9-b3f3-0b364baf9d34"
       ]
@@ -278,9 +281,11 @@
       "last_name": "Nom du client TEST",
       "email": "clientTEST@email.com",
       "phone_number": "+33600000000",
+      "contract_requested": false,
       "sales_contact": "1a99f054-8e33-4719-8ab3-d2249a3051dd",
       "locations": [
-        "a328ac61-6338-4f51-8b43-4e765673fdc0"
+        "a328ac61-6338-4f51-8b43-4e765673fdc0",
+        "16f85f01-89b9-4663-80cb-de2e14233edd"
       ]
     }
   }

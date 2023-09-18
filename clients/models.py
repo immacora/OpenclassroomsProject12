@@ -38,6 +38,7 @@ class Client(TimestampedModel):
     )
     email = models.EmailField("Email du client", blank=True)
     phone_number = PhoneNumberField(blank=True)
+    contract_requested = models.BooleanField(default=False)
     sales_contact = models.ForeignKey(
         to=Employee,
         on_delete=models.SET_NULL,
@@ -58,9 +59,11 @@ class Client(TimestampedModel):
 
 @receiver(pre_delete, sender=Client)
 def delete_linked_locations(sender, instance, **kwargs):
-    """Delete client locations if they are not used elsewhere."""
+    """Delete client locations if they are not used by other clients or events."""
     locations = instance.locations.all()
     for location in locations:
-        if location.client_locations.count() == 1:
-            if location.event_locations.count() == 0:
-                location.delete()
+        if (
+            location.client_locations.count() == 1
+            and location.event_locations.count() == 0
+        ):
+            location.delete()

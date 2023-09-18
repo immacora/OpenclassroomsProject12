@@ -11,9 +11,11 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
 
 from clients.permissions import IsSalesContact
-from helpers.functions import add_locations_to_model
+from helpers.functions import add_locations, remove_locations, update_sales_contact
 from accounts.models import Employee
 from clients.models import Client
+from locations.models import Location
+from contracts.models import Contract
 from .serializers import (
     CreateEmployeeSerializer,
     CustomUserDetailSerializer,
@@ -21,6 +23,7 @@ from .serializers import (
     EmployeeDetailSerializer,
     ClientListSerializer,
     ClientDetailSerializer,
+    ContractDetailSerializer
 )
 
 CustomUser = get_user_model()
@@ -115,6 +118,7 @@ class ClientListAPIView(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = ClientListSerializer
     queryset = Client.objects.all()
+    filterset_fields = ["contract_requested"]
 
     def post(self, request, *args, **kwargs):
         if request.user.has_perm("clients.add_client"):
@@ -127,11 +131,9 @@ class ClientListAPIView(ListCreateAPIView):
                 client = Client.objects.create(
                     sales_contact=author_user.employee, **serializer.validated_data
                 )
-                add_locations_to_model(client, location_data)
+                add_locations(client, location_data)
                 client_data = ClientDetailSerializer(client).data
-
                 return Response(client_data, status=status.HTTP_201_CREATED)
-
             return Response(
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST, *args, **kwargs
             )
@@ -144,8 +146,10 @@ class ClientListAPIView(ListCreateAPIView):
 class ClientDetailAPIView(RetrieveUpdateDestroyAPIView):
     """
     Get Epic Events client detail with their related locations via id.
-    Edit client and add location.
-    Delete client and their locations if not used by others.
+    Edit client informations, add location(s) if requested,
+    or remove location from client with location_id field,
+    or add contract (MANAGEMENT only with contract requested True).
+    Delete client (and their locations if not used by other clients or events) if there is no linked contract.
 
     Permission : requesting user authenticated and IsAdminUser or IsSalesContact.
     """
@@ -164,19 +168,53 @@ class ClientDetailAPIView(RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         data = request.data
 
-        if "sales_contact" in data:
+        if request.user.is_staff:
+            if "updated_sales_contact" in data:
+                updated_sales_contact_id = data["updated_sales_contact"]
+                updated_sales_contact = update_sales_contact(
+                    instance, updated_sales_contact_id
+                )
+                if not isinstance(updated_sales_contact, str):
+                    return Response(updated_sales_contact, status=status.HTTP_200_OK)
+                else:
+                    return Response(
+                        {"details": updated_sales_contact},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+            elif "add_contract" in data and data["add_contract"] == "True":
+                if instance.contract_requested is True:
+                    contract = Contract.objects.create(client=instance)
+                    instance.contract_requested = False
+                    instance.save()
+                    contract_data = ContractDetailSerializer(contract).data
+                    return Response(contract_data, status=status.HTTP_201_CREATED)
+                return Response(
+                    {"details": "La création de contrat n'est pas demandée."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             return Response(
-                {"details": "Vous ne pouvez pas modifier le commercial attribué."},
+                {"details": "La saisie est invalide."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        serializer = self.get_serializer(instance, data=data, partial=partial)
+        else:
+            serializer = self.get_serializer(instance, data=data, partial=partial)
+            if "location_id" in data:
+                location_id = data["location_id"]
+                if Location.objects.filter(location_id=location_id).exists():
+                    remove_locations(instance, location_id)
+                    client_data = ClientDetailSerializer(instance).data
+                    return Response(client_data, status=status.HTTP_200_OK)
+                return Response(
+                    {"details": "L'identifiant du lieu est invalide."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if serializer.is_valid(raise_exception=True):
+                if "locations" in data:
+                    location_data = serializer.validated_data.pop("locations")
+                    add_locations(instance, location_data)
 
-        if serializer.is_valid(raise_exception=True):
-            if "locations" in data:
-                location_data = serializer.validated_data.pop("locations")
-                add_locations_to_model(instance, location_data)
+                    self.perform_update(serializer)
+                    return Response(serializer.data)
                 self.perform_update(serializer)
-                return Response(serializer.data)
-            self.perform_update(serializer)
-
-        return Response(serializer.data)
+            return Response(serializer.data)
