@@ -8,6 +8,7 @@ exclude=
     .venv/,
     documentation/,
     config/settings/,
+    *migrations*,
     requirements.txt,
     manage.py,
     README.md
