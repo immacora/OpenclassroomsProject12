@@ -26,8 +26,21 @@ class ClientAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         try:
             if not obj.sales_contact.department == "SALES":
-                raise PermissionDenied("Le sales_contact doit être un employé du département ventes.")
+                raise PermissionDenied(
+                    "Le sales_contact doit être un employé du département ventes."
+                )
             obj.save()
         except PermissionDenied as e:
-            self.message_user(request, str(e), level='ERROR')
+            self.message_user(request, str(e), level="ERROR")
+            return None
+
+    def delete_model(self, request, obj):
+        try:
+            if obj.has_signed_contracts():
+                raise PermissionDenied(
+                    "Vous ne pouvez pas supprimer un client dont au moins un contrat est signé."
+                )
+            obj.delete()
+        except PermissionDenied as e:
+            self.message_user(request, str(e), level="ERROR")
             return None
