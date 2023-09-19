@@ -25,7 +25,7 @@ class TestGetClients:
         WHEN the clients endpoint is requested (GET)
         THEN checks that response is 200 and datas are displayed
         """
-        clients = ClientFactory.create_batch(5)
+        clients = ClientFactory.create_batch(5)  # noqa: F841
         access_token = employees_users_with_tokens[
             "management_employee"
         ].user.access_token
@@ -46,7 +46,7 @@ class TestGetClients:
         WHEN the clients endpoint is requested (GET)
         THEN checks that response is 200 and datas are displayed
         """
-        clients = ClientFactory.create_batch(5)
+        clients = ClientFactory.create_batch(5)  # noqa: F841
         access_token = employees_users_with_tokens["sales_employee"].user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
         response = api_client.get(reverse("clients"), headers=headers)
@@ -65,7 +65,7 @@ class TestGetClients:
         WHEN the clients endpoint is requested (GET)
         THEN checks that response is 200 and datas are displayed
         """
-        clients = ClientFactory.create_batch(5)
+        clients = ClientFactory.create_batch(5)  # noqa: F841
         access_token = employees_users_with_tokens["support_employee"].user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
         response = api_client.get(reverse("clients"), headers=headers)
@@ -84,7 +84,7 @@ class TestGetClients:
         WHEN the clients endpoint is requested (GET)
         THEN checks that response is 401 and error message is displayed
         """
-        clients = ClientFactory.create_batch(5)
+        clients = ClientFactory.create_batch(5)  # noqa: F841
         access_token = "INVALIDTOKEN"
         headers = {"Authorization": f"Bearer {access_token}"}
         response = api_client.get(reverse("clients"), headers=headers)
@@ -157,6 +157,7 @@ class TestPostClients:
         assert "TEST CREATE Nom du client" in response.data["last_name"]
         assert "TESTCREATEclient@email.com" in response.data["email"]
         assert "+33600000000" in response.data["phone_number"]
+        assert response.data["contract_requested"] is False
         assert 1 == response.data["locations"][0]["street_number"]
         assert (
             "TEST CREATE Rue du lieu 1" in response.data["locations"][0]["street_name"]
@@ -187,7 +188,7 @@ class TestPostClients:
         assert Employee.objects.count() == 3
         assert CustomUser.objects.count() == 3
         assert (
-            "La saisie doit comporter uniquement des caractères alphanumériques avec apostrophe, tiret, @, point et espace."
+            "La saisie doit comporter uniquement des caractères alphanumériques, apostrophe, tiret, @, point, espace."
             in response.data["company_name"]
         )
         assert (

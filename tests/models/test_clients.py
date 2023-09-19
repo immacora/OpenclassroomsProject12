@@ -26,6 +26,7 @@ class TestClients:
         client.locations.add(new_location)
         assert Client.objects.count() == 1
         assert client.locations.count() == 1
+        assert client.contract_requested is False
 
     def test_create_client_with_not_unique_siren_raises_error(self, new_client):
         """Tests if client creation raise IntegrityError with not unique siren."""
@@ -46,6 +47,8 @@ class TestClients:
     def test_delete_client_and_his_location(self, new_client):
         """Tests if client deletion delete his location.."""
 
+        assert Client.objects.count() == 1
+        assert Location.objects.count() == 1
         new_client.delete()
         assert Client.objects.count() == 0
         assert Location.objects.count() == 0

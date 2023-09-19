@@ -14,7 +14,6 @@ from clients.permissions import IsSalesContact
 from helpers.functions import add_locations, remove_locations, update_sales_contact
 from accounts.models import Employee
 from clients.models import Client
-from locations.models import Location
 from contracts.models import Contract
 from .serializers import (
     CreateEmployeeSerializer,
@@ -191,7 +190,7 @@ class ClientDetailAPIView(RetrieveUpdateDestroyAPIView):
                     return Response(contract_data, status=status.HTTP_201_CREATED)
                 return Response(
                     {"details": "La création de contrat n'est pas demandée."},
-                    status=status.HTTP_400_BAD_REQUEST,
+                    status=status.HTTP_401_UNAUTHORIZED,
                 )
             return Response(
                 {"details": "La saisie est invalide."},
@@ -201,14 +200,18 @@ class ClientDetailAPIView(RetrieveUpdateDestroyAPIView):
             serializer = self.get_serializer(instance, data=data, partial=partial)
             if "location_id" in data:
                 location_id = data["location_id"]
-                if Location.objects.filter(location_id=location_id).exists():
+                location_uuid = remove_locations(instance, location_id)
+
+                if not isinstance(location_uuid, str):
                     remove_locations(instance, location_id)
                     client_data = ClientDetailSerializer(instance).data
                     return Response(client_data, status=status.HTTP_200_OK)
-                return Response(
-                    {"details": "L'identifiant du lieu est invalide."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                else:
+                    return Response(
+                        {"details": location_uuid},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
             if serializer.is_valid(raise_exception=True):
                 if "locations" in data:
                     location_data = serializer.validated_data.pop("locations")
@@ -223,8 +226,10 @@ class ClientDetailAPIView(RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         if instance.has_signed_contracts():
             return Response(
-                {"details": "Vous ne pouvez pas supprimer un client dont au moins un contrat est signé."},
-                status=status.HTTP_400_BAD_REQUEST,
+                {
+                    "details": "Vous ne pouvez pas supprimer un client dont au moins un contrat est signé."
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
             )
         else:
             return self.destroy(request, *args, **kwargs)
