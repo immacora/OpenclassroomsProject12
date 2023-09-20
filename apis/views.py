@@ -26,6 +26,7 @@ from .serializers import (
     ContractDetailSerializer,
     ContractListSerializer,
 )
+from .filters import ContractFilter
 
 CustomUser = get_user_model()
 
@@ -50,6 +51,7 @@ class EmployeeListAPIView(ListCreateAPIView):
     permission_classes = (IsAuthenticated, IsAdminUser)
     serializer_class = EmployeeListSerializer
     queryset = Employee.objects.all()
+    search_fields = ["last_name", "department"]
 
     def post(self, request, *args, **kwargs):
         serializer = CreateEmployeeSerializer(data=request.data)
@@ -120,6 +122,7 @@ class ClientListAPIView(ListCreateAPIView):
     serializer_class = ClientListSerializer
     queryset = Client.objects.all()
     filterset_fields = ["contract_requested"]
+    search_fields = ["company_name"]
 
     def post(self, request, *args, **kwargs):
         if request.user.has_perm("clients.add_client"):
@@ -243,3 +246,4 @@ class ContractListAPIView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = ContractListSerializer
     queryset = Contract.objects.all()
+    filterset_class = ContractFilter
