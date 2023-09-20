@@ -1,13 +1,30 @@
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 
+from contracts.models import Contract
 from .models import Client
+
+
+class ContractInline(admin.TabularInline):
+    model = Contract
+    extra = 0
+    fields = (
+        "contract_description",
+        "amount",
+        "payment_due",
+        "is_signed",
+        "client",
+        "created_at",
+        "updated_at",
+    )
+    readonly_fields = ("created_at", "updated_at")
 
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
     """Define admin model for client model."""
 
+    inlines = [ContractInline]
     list_display = [
         "company_name",
         "siren",
