@@ -6,6 +6,7 @@ from rest_framework.generics import (
     GenericAPIView,
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
+    ListAPIView,
 )
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
@@ -22,7 +23,8 @@ from .serializers import (
     EmployeeDetailSerializer,
     ClientListSerializer,
     ClientDetailSerializer,
-    ContractDetailSerializer
+    ContractDetailSerializer,
+    ContractListSerializer,
 )
 
 CustomUser = get_user_model()
@@ -233,3 +235,11 @@ class ClientDetailAPIView(RetrieveUpdateDestroyAPIView):
             )
         else:
             return self.destroy(request, *args, **kwargs)
+
+
+class ContractListAPIView(ListAPIView):
+    """Get contracts list."""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ContractListSerializer
+    queryset = Contract.objects.all()

@@ -183,6 +183,7 @@ class ClientListSerializer(ModelSerializer):
         fields = (
             "client_id",
             "company_name",
+            "siren",
             "sales_contact",
             "contract_requested",
             "created_at",
@@ -214,11 +215,15 @@ class ContractDetailSerializer(ModelSerializer):
 class ContractListSerializer(ModelSerializer):
     """Serializer with minimal informations for contracts list."""
 
+    client = ClientListSerializer()
+
     class Meta:
-        model = Client
+        model = Contract
         fields = (
             "contract_id",
             "is_signed",
+            "amount",
+            "payment_due",
             "client",
             "created_at",
             "updated_at",

@@ -9,10 +9,11 @@ class ContractAdmin(admin.ModelAdmin):
     """Define admin model for contract model."""
 
     list_display = [
-        "client",
+        "contract_description",
         "amount",
         "payment_due",
         "is_signed",
+        "client",
         "created_at",
         "updated_at",
     ]
