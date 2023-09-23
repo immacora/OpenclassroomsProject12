@@ -34,6 +34,7 @@ def add_default_permissions_to_groups(management_group, sales_group, support_gro
 
     add_contract = Permission.objects.get(codename="add_contract")
     change_contract = Permission.objects.get(codename="change_contract")
+    delete_contract = Permission.objects.get(codename="delete_contract")
     view_contract = Permission.objects.get(codename="view_contract")
 
     change_event = Permission.objects.get(codename="change_event")
@@ -48,12 +49,16 @@ def add_default_permissions_to_groups(management_group, sales_group, support_gro
             change_employee,
             delete_employee,
             view_employee,
+            add_location,
+            change_location,
+            delete_location,
             view_location,
             change_client,
             delete_client,
             view_client,
             add_contract,
             change_contract,
+            delete_contract,
             view_contract,
             change_event,
             view_event,
