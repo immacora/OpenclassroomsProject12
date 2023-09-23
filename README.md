@@ -79,15 +79,7 @@ REFRESH_TOKEN_LIFETIME=NumberOfLifetimeDays # ex: 1
 ### Project Setup and Run
 
 ```sh
-py manage.py makemigrations accounts
-py manage.py makemigrations locations
-py manage.py makemigrations clients
-py manage.py makemigrations contracts
-py manage.py makemigrations events
-```
-
-```sh
-py manage.py migrate
+py manage.py makemigrations accounts locations clients contracts events && py manage.py migrate
 ```
 
 ```sh

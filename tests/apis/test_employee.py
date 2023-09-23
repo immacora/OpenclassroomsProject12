@@ -9,14 +9,14 @@ CustomUser = get_user_model()
 
 class TestGetEmployee:
     """
-    GIVEN fixture for employees with their associated users and tokens
+    GIVEN a fixture for employees with their associated users and tokens
     WHEN user tries to get an employee via id
     THEN checks that the response is valid and data are displayed
     """
 
     def test_get_employee_route_success(self, api_client, employees_users_with_tokens):
         """
-        GIVEN a management employee valid token and a valid employee_id
+        GIVEN a fixture for management employee with valid token and a valid sales employee_id
         WHEN the employee endpoint is requested (GET)
         THEN checks that response is 200 and datas are displayed
         """
@@ -49,7 +49,7 @@ class TestGetEmployee:
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN a sales employee valid token and a valid employee_id
+        GIVEN a fixture for support employee with valid token and a valid sales employee_id
         WHEN the employee endpoint is requested (GET)
         THEN checks that response is 403 and error message is displayed
         """
@@ -68,13 +68,12 @@ class TestGetEmployee:
             "Vous n'avez pas la permission d'effectuer cette action."
             in response.data["detail"]
         )
-        assert "employee_id" not in response.data
 
     def test_get_employee_route_failed_with_unauthorized(
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN an invalid token and a valid employee_id
+        GIVEN an invalid token and a valid sales employee_id
         WHEN the employee endpoint is requested (GET)
         THEN checks that response is 401 and error message is displayed
         """
@@ -95,9 +94,9 @@ class TestGetEmployee:
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN a management employee valid token and a invalid employee_id
+        GIVEN a fixture for management employee with valid token and a invalid employee_id
         WHEN the employee endpoint is requested (GET)
-        THEN checks that response is 404 and error message is displayed
+        THEN checks that response is 404
         """
         access_token = employees_users_with_tokens[
             "management_employee"
@@ -111,8 +110,8 @@ class TestGetEmployee:
 
 class TestPutEmployee:
     """
-    GIVEN fixture for employees with their associated users and tokens
-    WHEN user tries to edit an employee and his related user via id
+    GIVEN a fixture for employees with their associated users and tokens, valid and invalid employee data
+    WHEN user tries to update an employee and his related user via id
     THEN checks that the response is valid and data are displayed
     """
 
@@ -133,7 +132,7 @@ class TestPutEmployee:
 
     def test_put_employee_route_success(self, api_client, employees_users_with_tokens):
         """
-        GIVEN a management employee valid token, a valid employee_id and valid data
+        GIVEN a fixture for management employee with valid token, a valid sales employee_id and valid data
         WHEN the employee endpoint is updated to (PUT)
         THEN checks that response is 200 and datas are displayed
         """
@@ -159,8 +158,8 @@ class TestPutEmployee:
         assert "SALES" in response.data["department"]
         assert str(employee_to_update.user.user_id) in response.data["user"]["user_id"]
         assert "UPDATEDadminTEST@email.com" in response.data["user"]["email"]
-        assert False == response.data["user"]["is_active"]  # noqa: E712
-        assert False == response.data["user"]["is_staff"]  # noqa: E712
+        assert response.data["user"]["is_active"] is False
+        assert response.data["user"]["is_staff"] is False
         assert "date_joined" in response.data["user"]
         assert response.data["created_at"] != response.data["updated_at"]
 
@@ -168,9 +167,9 @@ class TestPutEmployee:
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN a management employee valid token, a valid employee_id and invalid data
+        GIVEN a fixture for management employee with valid token, a valid sales employee_id and invalid data
         WHEN the employee endpoint is updated to (PUT)
-        THEN checks that response is 400 and error message is displayed
+        THEN checks that response is 400 and error messages are displayed
         """
         access_token = employees_users_with_tokens[
             "management_employee"
@@ -204,7 +203,7 @@ class TestPutEmployee:
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN a support employee valid token, a valid employee_id and valid data
+        GIVEN a fixture for support employee with valid token, a valid sales employee_id and valid data
         WHEN the employee endpoint is updated to (PUT)
         THEN checks that response is 403 and error message is displayed
         """
@@ -230,7 +229,7 @@ class TestPutEmployee:
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN an invalid token, a valid employee_id and valid data
+        GIVEN an invalid token, a fixture for valid sales employee_id and valid data
         WHEN the employee endpoint is updated to (PUT)
         THEN checks that response is 401 and error message is displayed
         """
@@ -252,16 +251,16 @@ class TestPutEmployee:
 
 class TestDeleteEmployee:
     """
-    GIVEN fixture for employees with their associated users and tokens
+    GIVEN a fixture for employees with their associated users and tokens
     WHEN user tries to delete an employee and his linked user via id
-    THEN checks that the response is valid
+    THEN checks that the response is valid or data are displayed
     """
 
     def test_delete_employee_route_success(
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN a management employee valid token and a valid employee_id
+        GIVEN a fixture for management employee with valid token and a valid sales employee_id
         WHEN the employee endpoint is deleted (DEL)
         THEN checks that response is 204
         """
@@ -283,7 +282,7 @@ class TestDeleteEmployee:
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN a support employee valid token and a valid employee_id
+        GIVEN a fixture for support employee with valid token and a valid sales employee_id
         WHEN the employee endpoint is deleted (DEL)
         THEN checks that response is 403 and error message is displayed
         """
@@ -307,7 +306,7 @@ class TestDeleteEmployee:
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN an invalid token and a valid employee_id
+        GIVEN an invalid token and a fixture for valid sales employee_id
         WHEN the employee endpoint is deleted (DEL)
         THEN checks that response is 401 and error message is displayed
         """

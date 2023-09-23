@@ -78,6 +78,15 @@ def new_sales_contact(db, sales_contact_factory):
 @pytest.fixture
 def new_client(db, client_factory, location_factory):
     client = client_factory.create()
+    refresh = RefreshToken.for_user(client.sales_contact.user)
+    client.sales_contact.user.access_token = str(refresh.access_token)
+    client.sales_contact.user.refresh_token = str(refresh)
+    return client
+
+
+@pytest.fixture
+def new_client_with_location(db, client_factory, location_factory):
+    client = client_factory.create()
     location = location_factory.create()
     client.locations.add(location)
     refresh = RefreshToken.for_user(client.sales_contact.user)

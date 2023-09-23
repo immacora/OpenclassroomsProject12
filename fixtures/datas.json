@@ -213,6 +213,17 @@
     }
   },
   {
+    "model": "locations.location",
+    "pk": "37b28396-f88f-41f8-a8dc-2a29dfbcd559",
+    "fields": {
+      "street_number": 123,
+      "street_name": "Rue du lieu TEST",
+      "city": "VILLE-DU-LIEU-TEST",
+      "zip_code": "92300",
+      "country": "FRANCE"
+    }
+  },
+  {
     "model": "clients.client",
     "pk": "d25ac733-7c9e-4ab1-a4ee-236d8f3c2b6b",
     "fields": {
@@ -285,7 +296,8 @@
       "sales_contact": "1a99f054-8e33-4719-8ab3-d2249a3051dd",
       "locations": [
         "a328ac61-6338-4f51-8b43-4e765673fdc0",
-        "16f85f01-89b9-4663-80cb-de2e14233edd"
+        "16f85f01-89b9-4663-80cb-de2e14233edd",
+        "37b28396-f88f-41f8-a8dc-2a29dfbcd559"
       ]
     }
   },
@@ -320,8 +332,21 @@
     "pk": "8cfb6c41-43bd-419a-8eeb-1cfcd9840716",
     "fields": {
       "created_at": "2023-09-19T16:25:51.170Z",
-      "updated_at": "2023-09-19T16:25:51.170Z",
-      "contract_description": "Contrat avec le client n°3.",
+      "updated_at": "2023-09-20T17:47:26.188Z",
+      "contract_description": "Contrat n°1 avec le client n°3.",
+      "amount": 756.25,
+      "payment_due": 0.0,
+      "is_signed": true,
+      "client": "fe97dbe4-789b-4bef-95c3-52b5c0d12615"
+    }
+  },
+  {
+    "model": "contracts.contract",
+    "pk": "a06584bb-a908-4905-b1f6-8c1dab4d1ecc",
+    "fields": {
+      "created_at": "2023-09-20T17:45:23.924Z",
+      "updated_at": "2023-09-20T17:47:26.189Z",
+      "contract_description": "Contrat n°2 avec le client n°3.",
       "amount": 1160.75,
       "payment_due": 1160.75,
       "is_signed": false,

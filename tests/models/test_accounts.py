@@ -68,12 +68,16 @@ class TestEmployees:
             "accounts.change_employee",
             "accounts.delete_employee",
             "accounts.view_employee",
+            "locations.add_location",
+            "locations.change_location",
+            "locations.delete_location",
             "locations.view_location",
             "clients.change_client",
             "clients.delete_client",
             "clients.view_client",
             "contracts.add_contract",
             "contracts.change_contract",
+            "contracts.delete_contract",
             "contracts.view_contract",
             "events.change_event",
             "events.view_event",
@@ -151,8 +155,10 @@ class TestEmployees:
             )
 
     def test_delete_employee_and_his_user(self, new_employee):
-        """Tests if employees deletion delete his linked user.."""
+        """Tests if employees deletion delete his linked user."""
 
+        assert Employee.objects.count() == 1
+        assert CustomUser.objects.count() == 1
         new_employee.delete()
         assert Employee.objects.count() == 0
         assert CustomUser.objects.count() == 0

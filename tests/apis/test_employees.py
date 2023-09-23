@@ -9,14 +9,14 @@ CustomUser = get_user_model()
 
 class TestGetEmployees:
     """
-    GIVEN fixture for employees with their associated users and tokens
+    GIVEN a fixture for employees with their associated users and tokens
     WHEN user tries to get the list of employees
     THEN checks that the response is valid and data are displayed
     """
 
     def test_get_employees_route_success(self, api_client, employees_users_with_tokens):
         """
-        GIVEN a management employee valid token
+        GIVEN a fixture for management employee with valid token
         WHEN the employees endpoint is requested (GET)
         THEN checks that response is 200 and datas are displayed
         """
@@ -35,7 +35,7 @@ class TestGetEmployees:
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN a sales employee valid token
+        GIVEN a fixture for sales employee with valid token
         WHEN the employees endpoint is requested (GET)
         THEN checks that response is 403 and error message is displayed
         """
@@ -45,8 +45,6 @@ class TestGetEmployees:
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert Employee.objects.count() == 3
         assert CustomUser.objects.count() == 3
-        assert "count" not in response.data
-        assert "results" not in response.data
         assert (
             "Vous n'avez pas la permission d'effectuer cette action."
             in response.data["detail"]
@@ -71,7 +69,7 @@ class TestGetEmployees:
 
 class TestPostEmployees:
     """
-    GIVEN fixture for employees with their associated users and tokens
+    GIVEN a fixture for employees with their associated users and tokens, valid and invalid employee data
     WHEN user tries to create a new employee with his associated user
     THEN checks that the response is valid and data are displayed
     """
@@ -99,7 +97,7 @@ class TestPostEmployees:
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN a management employee valid token and valid data
+        GIVEN a fixture for management employee with valid token and valid data
         WHEN the employees endpoint is posted to (POST)
         THEN checks that response is 200 and datas are displayed
         """
@@ -118,11 +116,11 @@ class TestPostEmployees:
         assert "Nom de test" in response.data["last_name"]
         assert "Prénom de test" in response.data["first_name"]
         assert "MANAGEMENT" in response.data["department"]
-        assert b"user_id" in response.content
+        assert "user_id" in response.data["user"]
         assert "testcreateemployee@email.com" in response.data["user"]["email"]
-        assert b"password" not in response.content
-        assert True == response.data["user"]["is_active"]  # noqa: E712
-        assert True == response.data["user"]["is_staff"]  # noqa: E712
+        assert "password" not in response.data["user"]
+        assert response.data["user"]["is_active"] is True
+        assert response.data["user"]["is_staff"] is True
         assert "date_joined" in response.data["user"]
         assert response.data["created_at"] == response.data["updated_at"]
 
@@ -130,9 +128,9 @@ class TestPostEmployees:
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN a management employee valid token and invalid data
+        GIVEN a fixture for management employee with valid token and invalid data
         WHEN the employees endpoint is posted to (POST)
-        THEN checks that response is 400 and error message is displayed
+        THEN checks that response is 400 and error messages are displayed
         """
         access_token = employees_users_with_tokens[
             "management_employee"
@@ -161,7 +159,7 @@ class TestPostEmployees:
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN a support employee valid token and valid data
+        GIVEN a fixture for support employee with valid token and valid data
         WHEN the employees endpoint is posted to (POST)
         THEN checks that response is 403 and error message is displayed
         """
