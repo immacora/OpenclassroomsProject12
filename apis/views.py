@@ -26,6 +26,7 @@ from .serializers import (
     ClientDetailSerializer,
     LocationDetailSerializer,
     ContractListSerializer,
+    ContractDetailSerializer,
 )
 from .filters import ContractFilter
 
@@ -148,7 +149,7 @@ class ClientListAPIView(ListCreateAPIView):
 class ClientDetailAPIView(RetrieveUpdateDestroyAPIView):
     """
     Get Epic Events client detail with their related locations via id.
-    Edit client informations or update sales_contact (MANAGEMENT only).
+    Edit client informations (MANAGEMENT and sales_contact) or update sales_contact (MANAGEMENT only).
     Delete client if there is no signed contracts.
 
     Permission : requesting user authenticated and IsAdminUser or IsSalesContact.
@@ -310,3 +311,56 @@ class ContractListAPIView(ListAPIView):
     serializer_class = ContractListSerializer
     queryset = Contract.objects.all()
     filterset_class = ContractFilter
+
+
+class ClientContractsListAPIView(ListCreateAPIView):
+    """
+    Get contracts client list (permission authenticated IsAdminUser or IsSalesContact).
+    Create contract if the requesting user IsAdminUser and if contract_requested client field is True.
+    """
+
+    permission_classes = [IsAdminUser | IsAuthenticated & IsSalesContact]
+    serializer_class = ContractListSerializer
+    filterset_fields = ["contract_requested"]
+
+    def list(self, request, *args, **kwargs):
+        client_id = kwargs["client_id"]
+        queryset = Contract.objects.filter(client_id=client_id)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        if request.user.is_staff:
+            client_id = kwargs["client_id"]
+            client = get_object_or_404(Client, client_id=client_id)
+
+            if client.contract_requested:
+                serializer = ContractDetailSerializer(data=request.data)
+
+                if serializer.is_valid(raise_exception=True):
+                    payment_due = request.data["amount"]
+                    contract = Contract.objects.create(
+                        payment_due=payment_due,
+                        client=client,
+                        **serializer.validated_data
+                    )
+                    client.contract_requested = False
+                    client.save()
+                    contract_data = ContractDetailSerializer(contract).data
+                    return Response(contract_data, status=status.HTTP_201_CREATED)
+
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"details": "La création de contrat n'est pas demandée."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(
+            {"detail": "Vous n'avez pas la permission d'effectuer cette action."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
