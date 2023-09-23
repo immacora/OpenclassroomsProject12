@@ -12,9 +12,10 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
 
 from clients.permissions import IsSalesContact
-from helpers.functions import add_locations, remove_locations, update_sales_contact
+from helpers.functions import update_sales_contact
 from accounts.models import Employee
 from clients.models import Client
+from locations.models import Location
 from contracts.models import Contract
 from .serializers import (
     CreateEmployeeSerializer,
@@ -23,7 +24,7 @@ from .serializers import (
     EmployeeDetailSerializer,
     ClientListSerializer,
     ClientDetailSerializer,
-    ContractDetailSerializer,
+    LocationDetailSerializer,
     ContractListSerializer,
 )
 from .filters import ContractFilter
@@ -114,8 +115,7 @@ class EmployeeDetailAPIView(RetrieveUpdateDestroyAPIView):
 class ClientListAPIView(ListCreateAPIView):
     """
     Get Epic Events client list (permission all authenticated employees).
-    Create client, their location(s) and sales_contact to which is added the change_client permission
-    if the requesting user IsAuthenticated and has add_client permission.
+    Create client if the requesting user IsAuthenticated and has add_client permission.
     """
 
     permission_classes = (IsAuthenticated,)
@@ -130,19 +130,17 @@ class ClientListAPIView(ListCreateAPIView):
                 context={"request": request}, data=request.data
             )
             if serializer.is_valid(raise_exception=True):
-                location_data = serializer.validated_data.pop("locations")
                 author_user = serializer.validated_data.pop("sales_contact")
                 client = Client.objects.create(
                     sales_contact=author_user.employee, **serializer.validated_data
                 )
-                add_locations(client, location_data)
                 client_data = ClientDetailSerializer(client).data
                 return Response(client_data, status=status.HTTP_201_CREATED)
             return Response(
                 serializer.errors, status=status.HTTP_400_BAD_REQUEST, *args, **kwargs
             )
         return Response(
-            {"details": "Vous n'avez pas la permission d'effectuer cette action."},
+            {"detail": "Vous n'avez pas la permission d'effectuer cette action."},
             status=status.HTTP_403_FORBIDDEN,
         )
 
@@ -150,10 +148,8 @@ class ClientListAPIView(ListCreateAPIView):
 class ClientDetailAPIView(RetrieveUpdateDestroyAPIView):
     """
     Get Epic Events client detail with their related locations via id.
-    Edit client informations, add location(s) if requested,
-    or remove location from client with location_id field,
-    or add contract (MANAGEMENT only with contract requested True).
-    Delete client (and their locations if not used by other clients or events) if there is no linked contract.
+    Edit client informations or update sales_contact (MANAGEMENT only).
+    Delete client if there is no signed contracts.
 
     Permission : requesting user authenticated and IsAdminUser or IsSalesContact.
     """
@@ -185,46 +181,14 @@ class ClientDetailAPIView(RetrieveUpdateDestroyAPIView):
                         {"details": updated_sales_contact},
                         status=status.HTTP_400_BAD_REQUEST,
                     )
-
-            elif "add_contract" in data and data["add_contract"] == "True":
-                if instance.contract_requested is True:
-                    contract = Contract.objects.create(client=instance)
-                    instance.contract_requested = False
-                    instance.save()
-                    contract_data = ContractDetailSerializer(contract).data
-                    return Response(contract_data, status=status.HTTP_201_CREATED)
-                return Response(
-                    {"details": "La création de contrat n'est pas demandée."},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
             return Response(
                 {"details": "La saisie est invalide."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         else:
             serializer = self.get_serializer(instance, data=data, partial=partial)
-            if "location_id" in data:
-                location_id = data["location_id"]
-                location_uuid = remove_locations(instance, location_id)
-
-                if not isinstance(location_uuid, str):
-                    remove_locations(instance, location_id)
-                    client_data = ClientDetailSerializer(instance).data
-                    return Response(client_data, status=status.HTTP_200_OK)
-                else:
-                    return Response(
-                        {"details": location_uuid},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-
-            if serializer.is_valid(raise_exception=True):
-                if "locations" in data:
-                    location_data = serializer.validated_data.pop("locations")
-                    add_locations(instance, location_data)
-
-                    self.perform_update(serializer)
-                    return Response(serializer.data)
-                self.perform_update(serializer)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
             return Response(serializer.data)
 
     def delete(self, request, *args, **kwargs):
@@ -234,10 +198,109 @@ class ClientDetailAPIView(RetrieveUpdateDestroyAPIView):
                 {
                     "details": "Vous ne pouvez pas supprimer un client dont au moins un contrat est signé."
                 },
-                status=status.HTTP_401_UNAUTHORIZED,
+                status=status.HTTP_403_FORBIDDEN,
             )
         else:
             return self.destroy(request, *args, **kwargs)
+
+
+class ClientLocationsListAPIView(ListCreateAPIView):
+    """
+    Get locations client list.
+    Create or add location(s) to client.
+
+    Permission : requesting user authenticated and IsAdminUser or IsSalesContact.
+    """
+
+    permission_classes = [IsAdminUser | IsAuthenticated & IsSalesContact]
+    serializer_class = LocationDetailSerializer
+
+    def list(self, request, *args, **kwargs):
+        client_id = kwargs["client_id"]
+        client = get_object_or_404(Client, client_id=client_id)
+        queryset = client.locations.all()
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        client_id = kwargs["client_id"]
+        client = get_object_or_404(Client, client_id=client_id)
+        locations_data = request.data.get("locations", [])
+        locations_added = []
+
+        for location_data in locations_data:
+            serializer = self.serializer_class(data=location_data)
+
+            if serializer.is_valid(raise_exception=True):
+                location, created = Location.objects.get_or_create(
+                    **serializer.validated_data
+                )
+                client.locations.add(location)
+                locations_added.append(location)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        locations_serializer = LocationDetailSerializer(locations_added, many=True)
+        return Response(data=locations_serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ClientLocationDetailAPIView(RetrieveUpdateDestroyAPIView):
+    """
+    Get client location detail.
+    Edit and delete location if it is not in use by another client or event or remove it.
+
+    Permission : requesting user authenticated and IsAdminUser or IsSalesContact.
+    """
+
+    permission_classes = [IsAdminUser | IsAuthenticated & IsSalesContact]
+    serializer_class = LocationDetailSerializer
+
+    def get_object(self):
+        client_id = self.kwargs["client_id"]
+        client = get_object_or_404(Client, client_id=client_id)
+        location_id = self.kwargs["location_id"]
+        obj = get_object_or_404(Location, location_id=location_id)
+        self.check_object_permissions(self.request, client)
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", True)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+
+        if serializer.is_valid(raise_exception=True):
+            if (
+                instance.client_locations.count() == 1
+                and instance.event_locations.count() == 0
+            ):
+                self.perform_update(serializer)
+                return Response(serializer.data)
+            return Response(
+                {
+                    "details": "Ce lieu est utilisé par un autre modèle. Vous devez le supprimer de ce modèle."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if (
+            instance.client_locations.count() == 1
+            and instance.event_locations.count() == 0
+        ):
+            return self.destroy(request, *args, **kwargs)
+        client_id = kwargs["client_id"]
+        client = get_object_or_404(Client, client_id=client_id)
+        client.locations.remove(instance.location_id)
+        return Response(
+            {"details": "Le lieu a été retiré de ce client."}, status=status.HTTP_200_OK
+        )
 
 
 class ContractListAPIView(ListAPIView):

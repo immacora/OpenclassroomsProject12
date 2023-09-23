@@ -6,7 +6,6 @@ from rest_framework.serializers import (
     ValidationError,
     UUIDField,
     CurrentUserDefault,
-    BooleanField,
 )
 
 from accounts.models import Employee
@@ -65,7 +64,7 @@ class CreateEmployeeSerializer(ModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only__fields = "employee_id", "created_at", "updated_at"
+        read_only__fields = ("employee_id", "created_at", "updated_at")
 
 
 class CustomUserDetailSerializer(ModelSerializer):
@@ -74,7 +73,7 @@ class CustomUserDetailSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ("user_id", "email", "is_active", "is_staff", "date_joined")
-        read_only__fields = "user_id", "is_staff", "date_joined"
+        read_only__fields = ("user_id", "is_staff", "date_joined")
 
 
 class EmployeeDetailSerializer(ModelSerializer):
@@ -94,7 +93,7 @@ class EmployeeDetailSerializer(ModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only__fields = "employee_id", "created_at", "updated_at"
+        read_only__fields = ("employee_id", "created_at", "updated_at")
 
 
 class CustomUserListSerializer(ModelSerializer):
@@ -106,7 +105,7 @@ class CustomUserListSerializer(ModelSerializer):
             "user_id",
             "email",
         )
-        read_only__fields = "user_id"
+        read_only__fields = ("user_id",)
 
 
 class EmployeeListSerializer(ModelSerializer):
@@ -123,7 +122,7 @@ class EmployeeListSerializer(ModelSerializer):
             "department",
             "user",
         )
-        read_only__fields = "employee_id"
+        read_only__fields = ("employee_id",)
 
 
 class LocationDetailSerializer(ModelSerializer):
@@ -139,7 +138,7 @@ class LocationDetailSerializer(ModelSerializer):
             "zip_code",
             "country",
         )
-        read_only__fields = "location_id"
+        read_only__fields = ("location_id",)
 
 
 class ClientDetailSerializer(ModelSerializer):
@@ -151,8 +150,6 @@ class ClientDetailSerializer(ModelSerializer):
 
     sales_contact = UUIDField(default=CurrentUserDefault())
     updated_sales_contact = UUIDField(write_only=True, required=False)
-    add_contract = BooleanField(write_only=True, required=False)
-    locations = LocationDetailSerializer(many=True)
 
     class Meta:
         model = Client
@@ -167,12 +164,11 @@ class ClientDetailSerializer(ModelSerializer):
             "contract_requested",
             "sales_contact",
             "updated_sales_contact",
-            "add_contract",
             "locations",
             "created_at",
             "updated_at",
         )
-        read_only__fields = "client_id", "sales_contact", "created_at", "updated_at"
+        read_only__fields = ("client_id", "sales_contact", "created_at", "updated_at")
 
 
 class ClientListSerializer(ModelSerializer):
@@ -189,13 +185,13 @@ class ClientListSerializer(ModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only__fields = "client_id", "created_at", "updated_at"
+        read_only__fields = ("client_id", "created_at", "updated_at")
 
 
 class ContractDetailSerializer(ModelSerializer):
     """Serializer with all contract informations."""
 
-    client = ClientListSerializer()
+    client = ClientListSerializer(required=False)
 
     class Meta:
         model = Contract
@@ -209,7 +205,7 @@ class ContractDetailSerializer(ModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only__fields = "client_id", "created_at", "updated_at"
+        read_only__fields = ("contract_id", "client", "created_at", "updated_at")
 
 
 class ContractListSerializer(ModelSerializer):
@@ -228,4 +224,4 @@ class ContractListSerializer(ModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only__fields = "contract_id", "created_at", "updated_at"
+        read_only__fields = ("contract_id", "client", "created_at", "updated_at")
