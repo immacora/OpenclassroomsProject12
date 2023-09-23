@@ -6,16 +6,25 @@ from contracts.models import Contract
 
 
 class TestContracts:
+    """Tests contract model."""
+
     def test_create_contract(self, new_client):
         """Tests contract creation."""
 
-        new_client.contract_requested = True
-        contract = Contract.objects.create(client=new_client)
-        new_client.contract_requested = False
+        contract = Contract.objects.create(
+            contract_description="TEST Create contract description",
+            amount=1542.25,
+            payment_due=1542.25,
+            client=new_client,
+        )
         assert Client.objects.count() == 1
         assert Contract.objects.count() == 1
-        assert contract.client.contract_requested is False
-        assert contract.is_signed is False
+        assert contract.contract_id is not None
+        assert contract.contract_description == "TEST Create contract description"
+        assert contract.amount == 1542.25
+        assert contract.payment_due == 1542.25
+        assert not contract.is_signed
+        assert contract.client == new_client
 
     def test_create_contract_with_no_client_raises_error(self, new_client):
         """Tests if contract creation raise IntegrityError with no client."""

@@ -7,8 +7,8 @@ from tests.factories import ContractFactory
 
 class TestGetContracts:
     """
-    GIVEN fixture for contracts and employees with their associated users and tokens
-    WHEN user tries to get contracts
+    GIVEN fixtures for contracts and employees with their associated users and tokens
+    WHEN user tries to get all contracts
     THEN checks that the response is valid and data are displayed
     """
 
@@ -16,7 +16,7 @@ class TestGetContracts:
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN a management employee valid token
+        GIVEN a fixture for management employee with its valid token
         WHEN the contracts endpoint is requested (GET)
         THEN checks that response is 200 and datas are displayed
         """
@@ -35,7 +35,7 @@ class TestGetContracts:
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN a sales employee valid token
+        GIVEN a fixture for sales employee with its valid token
         WHEN the contracts endpoint is requested (GET)
         THEN checks that response is 200 and datas are displayed
         """
@@ -51,7 +51,7 @@ class TestGetContracts:
         self, api_client, employees_users_with_tokens
     ):
         """
-        GIVEN a support employee valid token
+        GIVEN a fixture for support employee with its valid token
         WHEN the contracts endpoint is requested (GET)
         THEN checks that response is 200 and datas are displayed
         """
