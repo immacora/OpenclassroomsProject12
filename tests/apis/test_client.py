@@ -393,7 +393,7 @@ class TestDeleteClient:
             reverse("client_detail", kwargs={"client_id": client_id}),
             headers=headers,
         )
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert Client.objects.count() == 1
         assert (
             "Vous ne pouvez pas supprimer un client dont au moins un contrat est signé."

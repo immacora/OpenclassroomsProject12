@@ -254,7 +254,7 @@
       "last_name": "Nom du client DEUX",
       "email": "client2@email.com",
       "phone_number": "+33665872154",
-      "contract_requested": false,
+      "contract_requested": true,
       "sales_contact": "96fd8688-4fdb-4928-a225-ed4e1850768e",
       "locations": [
         "16f85f01-89b9-4663-80cb-de2e14233edd"
@@ -282,6 +282,23 @@
   },
   {
     "model": "clients.client",
+    "pk": "db9adf65-c7c7-4710-8a9a-9691c0f842f7",
+    "fields": {
+      "created_at": "2023-09-23T15:13:17.413Z",
+      "updated_at": "2023-09-23T15:13:17.413Z",
+      "company_name": "Entreprise 4",
+      "siren": "624701974",
+      "first_name": "Prénom du client QUATRE",
+      "last_name": "Nom du client QUATRE",
+      "email": "client4@email.com",
+      "phone_number": "+33664821165",
+      "contract_requested": false,
+      "sales_contact": "1a99f054-8e33-4719-8ab3-d2249a3051dd",
+      "locations": []
+    }
+  },
+  {
+    "model": "clients.client",
     "pk": "e8685975-02c3-4389-8cf8-70d9c1a90adb",
     "fields": {
       "created_at": "2023-09-13T15:25:11.121Z",
@@ -292,7 +309,7 @@
       "last_name": "Nom du client TEST",
       "email": "clientTEST@email.com",
       "phone_number": "+33600000000",
-      "contract_requested": true,
+      "contract_requested": false,
       "sales_contact": "1a99f054-8e33-4719-8ab3-d2249a3051dd",
       "locations": [
         "a328ac61-6338-4f51-8b43-4e765673fdc0",
@@ -307,7 +324,7 @@
     "fields": {
       "created_at": "2023-09-19T16:10:00.705Z",
       "updated_at": "2023-09-19T16:23:15.330Z",
-      "contract_description": "Contrat avec le client n°1.",
+      "contract_description": "Contrat n°1 avec le client n°1.",
       "amount": 1500.8,
       "payment_due": 375.2,
       "is_signed": true,
@@ -320,7 +337,7 @@
     "fields": {
       "created_at": "2023-09-19T16:25:03.666Z",
       "updated_at": "2023-09-19T16:25:03.666Z",
-      "contract_description": "Contrat avec le client n°2.",
+      "contract_description": "Contrat n°1 avec le client n°2.",
       "amount": 2018.5,
       "payment_due": 0.0,
       "is_signed": true,
@@ -351,6 +368,19 @@
       "payment_due": 1160.75,
       "is_signed": false,
       "client": "fe97dbe4-789b-4bef-95c3-52b5c0d12615"
+    }
+  },
+  {
+    "model": "contracts.contract",
+    "pk": "d6ceb6b8-aa34-470f-83bc-68f6ea3ea5b6",
+    "fields": {
+      "created_at": "2023-09-23T15:31:14.527Z",
+      "updated_at": "2023-09-23T15:41:40.236Z",
+      "contract_description": "Contrat n°1 avec le client TEST.",
+      "amount": 1542.45,
+      "payment_due": 1200.45,
+      "is_signed": true,
+      "client": "e8685975-02c3-4389-8cf8-70d9c1a90adb"
     }
   }
 ]

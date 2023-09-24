@@ -17,7 +17,7 @@ class TestGetClientLocation:
     ):
         """
         GIVEN a fixture for client with location and its sales contact valid token
-        WHEN the client_location endpoint is requested (GET)
+        WHEN the client_location_detail endpoint is requested (GET)
         THEN checks that response is 200 and datas are displayed
         """
         access_token = new_client_with_location.sales_contact.user.access_token
@@ -46,7 +46,7 @@ class TestGetClientLocation:
     ):
         """
         GIVEN fixtures for client with location and valid unassigned sales contact token
-        WHEN the client_location endpoint is requested (GET)
+        WHEN the client_location_detail endpoint is requested (GET)
         THEN checks that response is 403 and error message is displayed
         """
         access_token = employees_users_with_tokens["sales_employee"].user.access_token
@@ -73,7 +73,7 @@ class TestGetClientLocation:
     ):
         """
         GIVEN a fixture for client with location and an invalid token
-        WHEN the client_location endpoint is requested (GET)
+        WHEN the client_location_detail endpoint is requested (GET)
         THEN checks that response is 401 and error message is displayed
         """
         access_token = "INVALIDTOKEN"
@@ -97,7 +97,7 @@ class TestGetClientLocation:
     ):
         """
         GIVEN a fixture for client with location, its sales contact valid token and invalid location_id
-        WHEN the client_location endpoint is requested (GET)
+        WHEN the client_location_detail endpoint is requested (GET)
         THEN checks that response is 404
         """
         access_token = new_client_with_location.sales_contact.user.access_token
@@ -138,7 +138,7 @@ class TestPutClientLocation:
     ):
         """
         GIVEN a fixture for client with location, its sales contact valid token and valid data
-        WHEN the client_location endpoint is updated to (PUT)
+        WHEN the client_location_detail endpoint is updated to (PUT)
         THEN checks that response is 200 and datas are displayed
         """
         access_token = new_client_with_location.sales_contact.user.access_token
@@ -168,7 +168,7 @@ class TestPutClientLocation:
     ):
         """
         GIVEN a fixture for client with location, its sales contact valid token and invalid data
-        WHEN the client_location endpoint is updated to (PUT)
+        WHEN the client_location_detail endpoint is updated to (PUT)
         THEN checks that response is 400 and error messages are displayed
         """
         access_token = new_client_with_location.sales_contact.user.access_token
@@ -210,7 +210,7 @@ class TestPutClientLocation:
     ):
         """
         GIVEN fixtures for client with location, valid unassigned sales_contact token and valid data
-        WHEN the client_location endpoint is updated to (PUT)
+        WHEN the client_location_detail endpoint is updated to (PUT)
         THEN checks that response is 403 and error message is displayed
         """
         access_token = employees_users_with_tokens["sales_employee"].user.access_token
@@ -239,7 +239,7 @@ class TestPutClientLocation:
     ):
         """
         GIVEN fixtures for client with location and client, with sales contacts valids tokens, location, and valid data
-        WHEN the client_location endpoint is updated with the location added to both clients (PUT)
+        WHEN the client_location_detail endpoint is updated with the location added to both clients (PUT)
         THEN checks that response is 403 and error message is displayed
         """
         new_client_with_location.locations.add(new_location)
@@ -260,7 +260,7 @@ class TestPutClientLocation:
             data=self.valid_data,
             format="json",
         )
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert Location.objects.count() == 2
         assert (
             "Ce lieu est utilisé par un autre modèle. Vous devez le supprimer de ce modèle."
@@ -272,7 +272,7 @@ class TestPutClientLocation:
     ):
         """
         GIVEN a fixture for client, an invalid token and valid data
-        WHEN the client_location endpoint is updated to (PUT)
+        WHEN the client_location_detail endpoint is updated to (PUT)
         THEN checks that response is 401 and error message is displayed
         """
         access_token = "INVALIDTOKEN"
@@ -304,8 +304,8 @@ class TestDeleteClientLocation:
         self, api_client, new_client_with_location
     ):
         """
-        GIVEN fixture for client with location and its sales contact valid token
-        WHEN the client_location endpoint is deleted (DEL)
+        GIVEN a fixture for client with location and its sales contact valid token
+        WHEN the client_location_detail endpoint is deleted (DEL)
         THEN checks that response is 204
         """
         access_token = new_client_with_location.sales_contact.user.access_token
@@ -326,9 +326,9 @@ class TestDeleteClientLocation:
         self, api_client, new_client_with_location, new_client, new_location
     ):
         """
-        GIVEN fixtures for client with location, client with its sales contact valid token and a location
-         WHEN the client_location endpoint is deleted (DEL)
-         THEN checks that response is 200 and message is displayed
+       GIVEN fixtures for client with location, client with its sales contact valid token and location
+        WHEN the client_location_detail endpoint is deleted (DEL)
+        THEN checks that response is 200 and message is displayed
         """
         new_client_with_location.locations.add(new_location)
         new_client.locations.add(new_location)
@@ -348,15 +348,14 @@ class TestDeleteClientLocation:
         )
         assert response.status_code == status.HTTP_200_OK
         assert Location.objects.count() == 2
-        assert "Le lieu a été retiré de ce client." in response.data["details"]
+        assert ("Le lieu a été retiré de ce client." in response.data["details"])
 
     def test_delete_client_location_route_failed_with_forbidden(
         self, api_client, new_client_with_location, employees_users_with_tokens
     ):
         """
-        GIVEN fixtures for client with location, employees with their associated users and tokens,
-        and valid unassigned sales contact
-        WHEN the client_location endpoint is deleted (DEL)
+        GIVEN fixtures for client with location and valid unassigned sales contact with token
+        WHEN the client_location_detail endpoint is deleted (DEL)
         THEN checks that response is 403 and error message is displayed
         """
         access_token = employees_users_with_tokens["sales_employee"].user.access_token
@@ -382,7 +381,7 @@ class TestDeleteClientLocation:
     ):
         """
         GIVEN a fixture for client with location and invalid token
-        WHEN the client_location endpoint is deleted (DEL)
+        WHEN the client_location_detail endpoint is deleted (DEL)
         THEN checks that response is 401 and error message is displayed
         """
         access_token = "INVALIDTOKEN"
