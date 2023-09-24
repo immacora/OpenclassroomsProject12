@@ -199,7 +199,7 @@ class ClientDetailAPIView(RetrieveUpdateDestroyAPIView):
                 {
                     "details": "Vous ne pouvez pas supprimer un client dont au moins un contrat est signé."
                 },
-                status=status.HTTP_403_FORBIDDEN,
+                status=status.HTTP_400_BAD_REQUEST,
             )
         else:
             return self.destroy(request, *args, **kwargs)
@@ -286,7 +286,7 @@ class ClientLocationDetailAPIView(RetrieveUpdateDestroyAPIView):
                 {
                     "details": "Ce lieu est utilisé par un autre modèle. Vous devez le supprimer de ce modèle."
                 },
-                status=status.HTTP_403_FORBIDDEN,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
     def delete(self, request, *args, **kwargs):
@@ -321,7 +321,6 @@ class ClientContractsListAPIView(ListCreateAPIView):
 
     permission_classes = [IsAdminUser | IsAuthenticated & IsSalesContact]
     serializer_class = ContractListSerializer
-    filterset_fields = ["contract_requested"]
 
     def list(self, request, *args, **kwargs):
         client_id = kwargs["client_id"]
@@ -363,4 +362,33 @@ class ClientContractsListAPIView(ListCreateAPIView):
         return Response(
             {"detail": "Vous n'avez pas la permission d'effectuer cette action."},
             status=status.HTTP_403_FORBIDDEN,
+        )
+
+
+class ClientContractDetailAPIView(RetrieveUpdateDestroyAPIView):
+    """
+    Get and update client contract.
+    Delete contract contract if it is not signed.
+
+    Permission : requesting user authenticated and IsAdminUser or IsSalesContact.
+    """
+
+    permission_classes = [IsAdminUser | IsAuthenticated & IsSalesContact]
+    serializer_class = ContractDetailSerializer
+
+    def get_object(self):
+        client_id = self.kwargs["client_id"]
+        client = get_object_or_404(Client, client_id=client_id)
+        contract_id = self.kwargs["contract_id"]
+        obj = get_object_or_404(Contract, contract_id=contract_id)
+        self.check_object_permissions(self.request, client)
+        return obj
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.is_signed is False:
+            return self.destroy(request, *args, **kwargs)
+        return Response(
+            {"details": "Vous ne pouvez pas supprimer un contrat signé."},
+            status=status.HTTP_400_BAD_REQUEST,
         )

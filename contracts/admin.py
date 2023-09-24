@@ -27,3 +27,12 @@ class ContractAdmin(admin.ModelAdmin):
         except PermissionDenied as e:
             self.message_user(request, str(e), level="ERROR")
             return None
+
+    def delete_model(self, request, obj):
+        try:
+            if obj.is_signed is True:
+                raise PermissionDenied("Vous ne pouvez pas supprimer un contrat signé.")
+            obj.delete()
+        except PermissionDenied as e:
+            self.message_user(request, str(e), level="ERROR")
+            return None
