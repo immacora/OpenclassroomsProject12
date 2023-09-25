@@ -6,6 +6,12 @@ from .models import Client
 
 
 class ContractInline(admin.TabularInline):
+    """
+    Add inline contract to client model.
+    Can add contract if contract_requested is true.
+    Can udate or delete contract via change link.
+    """
+
     model = Contract
     extra = 0
     fields = (
@@ -13,11 +19,15 @@ class ContractInline(admin.TabularInline):
         "amount",
         "payment_due",
         "is_signed",
-        "client",
         "created_at",
         "updated_at",
     )
     readonly_fields = ("created_at", "updated_at")
+    can_delete = False
+    show_change_link = True
+
+    def has_add_permission(self, request, obj):
+        return obj.contract_requested
 
 
 @admin.register(Client)
