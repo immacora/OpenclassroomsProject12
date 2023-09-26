@@ -1,5 +1,6 @@
 import uuid
 from phonenumber_field.modelfields import PhoneNumberField
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -55,6 +56,13 @@ class Client(TimestampedModel):
 
     def __str__(self):
         return f"Client {self.last_name} {self.first_name} de la société {self.company_name}"
+
+    def clean(self):
+        """Raise error if sales_contact department is not SALES."""
+        if not self.sales_contact.department == "SALES":
+            raise ValidationError(
+                "Le sales_contact doit être un employé du département ventes."
+            )
 
     def has_signed_contracts(self):
         return self.contract_set.filter(is_signed=True).exists()

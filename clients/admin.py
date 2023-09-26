@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.core.exceptions import PermissionDenied
 
 from contracts.models import Contract
 from .models import Client
@@ -9,7 +8,7 @@ class ContractInline(admin.TabularInline):
     """
     Add inline contract to client model.
     Can add contract if contract_requested is true.
-    Can udate or delete contract via change link.
+    Can update or delete contract via change link.
     """
 
     model = Contract
@@ -50,24 +49,7 @@ class ClientAdmin(admin.ModelAdmin):
     list_filter = ("contract_requested",)
     readonly_fields = ("created_at", "updated_at")
 
-    def save_model(self, request, obj, form, change):
-        try:
-            if not obj.sales_contact.department == "SALES":
-                raise PermissionDenied(
-                    "Le sales_contact doit être un employé du département ventes."
-                )
-            obj.save()
-        except PermissionDenied as e:
-            self.message_user(request, str(e), level="ERROR")
-            return None
-
-    def delete_model(self, request, obj):
-        try:
-            if obj.has_signed_contracts():
-                raise PermissionDenied(
-                    "Vous ne pouvez pas supprimer un client dont au moins un contrat est signé."
-                )
-            obj.delete()
-        except PermissionDenied as e:
-            self.message_user(request, str(e), level="ERROR")
-            return None
+    def has_delete_permission(self, request, obj=None):
+        if obj and hasattr(obj, "has_signed_contracts") and obj.has_signed_contracts():
+            return False
+        return True
