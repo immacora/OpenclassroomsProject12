@@ -12,6 +12,7 @@ from accounts.models import Employee
 from locations.models import Location
 from clients.models import Client
 from contracts.models import Contract
+from events.models import Event
 
 CustomUser = get_user_model()
 
@@ -171,8 +172,20 @@ class ClientDetailSerializer(ModelSerializer):
         read_only__fields = ("client_id", "sales_contact", "created_at", "updated_at")
 
 
+class EmployeeStrSerializer(ModelSerializer):
+    """Serializer with __str__ informations for other models list."""
+
+    representation_str = CharField(source="__str__", read_only=True)
+
+    class Meta:
+        model = Employee
+        fields = ["representation_str"]
+
+
 class ClientListSerializer(ModelSerializer):
     """Serializer with minimal informations for clients list."""
+
+    sales_contact = EmployeeStrSerializer()
 
     class Meta:
         model = Client
@@ -208,10 +221,20 @@ class ContractDetailSerializer(ModelSerializer):
         read_only__fields = ("contract_id", "client", "created_at", "updated_at")
 
 
+class ClientStrSerializer(ModelSerializer):
+    """Serializer with __str__ information for other models list."""
+
+    representation_str = CharField(source="__str__", read_only=True)
+
+    class Meta:
+        model = Client
+        fields = ["representation_str"]
+
+
 class ContractListSerializer(ModelSerializer):
     """Serializer with minimal informations for contracts list."""
 
-    client = ClientListSerializer()
+    client = ClientStrSerializer()
 
     class Meta:
         model = Contract
@@ -224,4 +247,44 @@ class ContractListSerializer(ModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only__fields = ("contract_id", "client", "created_at", "updated_at")
+        read_only__fields = ("contract_id", "created_at", "updated_at")
+
+
+class EventDetailSerializer(ModelSerializer):
+    """Serializer with all event informations."""
+
+    contract = ContractListSerializer(required=False)
+
+    class Meta:
+        model = Event
+        fields = (
+            "event_id",
+            "event_name",
+            "start_date",
+            "end_date",
+            "attendees",
+            "notes",
+            "contract",
+            "support_contact",
+            "locations",
+        )
+        read_only__fields = ("event_id", "contract", "created_at", "updated_at")
+
+
+class EventListSerializer(ModelSerializer):
+    """Serializer with minimal informations for events list."""
+
+    support_contact = EmployeeStrSerializer()
+
+    class Meta:
+        model = Event
+        fields = (
+            "event_id",
+            "event_name",
+            "start_date",
+            "end_date",
+            "is_event_over",
+            "contract",
+            "support_contact",
+        )
+        read_only__fields = ("event_id", "contract", "created_at", "updated_at")

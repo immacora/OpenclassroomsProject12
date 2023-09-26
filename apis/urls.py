@@ -12,6 +12,7 @@ from .views import (
     ClientContractsListAPIView,
     ClientContractDetailAPIView,
     ContractListAPIView,
+    EventListAPIView
 )
 
 
@@ -52,4 +53,5 @@ urlpatterns = [
         name="client_contract_detail",
     ),
     path("contracts/", ContractListAPIView.as_view(), name="contracts"),
+    path("events/", EventListAPIView.as_view(), name="events"),
 ]

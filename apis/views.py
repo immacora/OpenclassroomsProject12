@@ -17,6 +17,7 @@ from accounts.models import Employee
 from clients.models import Client
 from locations.models import Location
 from contracts.models import Contract
+from events.models import Event
 from .serializers import (
     CreateEmployeeSerializer,
     CustomUserDetailSerializer,
@@ -27,8 +28,9 @@ from .serializers import (
     LocationDetailSerializer,
     ContractListSerializer,
     ContractDetailSerializer,
+    EventListSerializer,
 )
-from .filters import ContractFilter
+from .filters import ContractFilter, EventFilter
 
 CustomUser = get_user_model()
 
@@ -304,15 +306,6 @@ class ClientLocationDetailAPIView(RetrieveUpdateDestroyAPIView):
         )
 
 
-class ContractListAPIView(ListAPIView):
-    """Get contracts list."""
-
-    permission_classes = (IsAuthenticated,)
-    serializer_class = ContractListSerializer
-    queryset = Contract.objects.all()
-    filterset_class = ContractFilter
-
-
 class ClientContractsListAPIView(ListCreateAPIView):
     """
     Get contracts client list (permission authenticated IsAdminUser or IsSalesContact).
@@ -392,3 +385,21 @@ class ClientContractDetailAPIView(RetrieveUpdateDestroyAPIView):
             {"details": "Vous ne pouvez pas supprimer un contrat signé."},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class ContractListAPIView(ListAPIView):
+    """Get all contracts list."""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ContractListSerializer
+    queryset = Contract.objects.all()
+    filterset_class = ContractFilter
+
+
+class EventListAPIView(ListAPIView):
+    """Get all events list."""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = EventListSerializer
+    queryset = Event.objects.all()
+    filterset_class = EventFilter

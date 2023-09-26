@@ -1,4 +1,6 @@
 import uuid
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -43,13 +45,32 @@ class Event(TimestampedModel):
         Location, related_name="event_locations", blank=True
     )
 
+    @property
+    def is_event_over(self):
+        """Return True if events is over."""
+        now = timezone.now()
+        return self.end_date < now
+
     def __str__(self):
-        return f"Événement {self.event_name} pour le client {self.contract.client} géré par {self.support_contact}"
+        return f"Événement {self.event_name} pour le client {self.contract.client.company_name}\
+géré par {self.support_contact}"
+
+    def clean(self):
+        """Raise error if end_date is later than start_date and start_date is in past."""
+        now = timezone.now()
+
+        if self.start_date and self.start_date < now:
+            raise ValidationError("La date de début ne peut pas être dans le passé.")
+
+        if self.start_date and self.end_date and self.start_date >= self.end_date:
+            raise ValidationError(
+                "La date de fin doit être postérieure à la date de début."
+            )
 
 
 @receiver(pre_delete, sender=Event)
 def delete_linked_locations(sender, instance, **kwargs):
-    """Delete event locations if they are not used elsewhere."""
+    """Delete event locations if they are not used by other clients or events."""
     locations = instance.locations.all()
     for location in locations:
         if location.event_locations.count() == 1:

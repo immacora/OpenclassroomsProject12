@@ -214,6 +214,17 @@
   },
   {
     "model": "locations.location",
+    "pk": "e433df0f-cae7-4593-a4c3-8077b28c0771",
+    "fields": {
+      "street_number": 4,
+      "street_name": "Rue du lieu 4",
+      "city": "VILLE-DU-LIEU",
+      "zip_code": "02400",
+      "country": "FRANCE"
+    }
+  },
+  {
+    "model": "locations.location",
     "pk": "37b28396-f88f-41f8-a8dc-2a29dfbcd559",
     "fields": {
       "street_number": 123,
@@ -381,6 +392,59 @@
       "payment_due": 1200.45,
       "is_signed": true,
       "client": "e8685975-02c3-4389-8cf8-70d9c1a90adb"
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": "e3bcdd5f-7994-403e-add7-25d2067faa95",
+    "fields": {
+      "created_at": "2023-09-25T11:29:50.776Z",
+      "updated_at": "2023-09-25T11:29:50.776Z",
+      "event_name": "Event 1 du contrat 1 du client DEUX",
+      "start_date": "2023-11-02T11:00:00Z",
+      "end_date": "2023-11-02T17:00:00Z",
+      "attendees": 75,
+      "notes": "Notes sur l'événement n°1 du contrat n°1 pour le client n°2.",
+      "contract": "246b886a-f0cb-4ad8-a4be-3e8e66300055",
+      "support_contact": "e5c776bc-0bd0-47aa-b53c-515382d4fa9d",
+      "locations": [
+        "e433df0f-cae7-4593-a4c3-8077b28c0771"
+      ]
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": "ccf68d10-9eec-4cd8-85eb-f665e5bb776e",
+    "fields": {
+      "created_at": "2023-09-25T11:36:38.823Z",
+      "updated_at": "2023-09-25T11:36:38.823Z",
+      "event_name": "Event 1 du contrat 1 du client TROIS",
+      "start_date": "2023-09-02T06:00:00Z",
+      "end_date": "2023-09-03T16:00:00Z",
+      "attendees": 4,
+      "notes": "Notes sur l'événement n°1 du contrat n°1 pour le client n°3.",
+      "contract": "8cfb6c41-43bd-419a-8eeb-1cfcd9840716",
+      "support_contact": "672849d2-31a8-4037-8eab-c2def37c986c",
+      "locations": [
+        "e433df0f-cae7-4593-a4c3-8077b28c0771"
+      ]
+    }
+  },
+  {
+    "model": "events.event",
+    "pk": "a389fbfc-8148-489d-a354-5a1c54feb90d",
+    "fields": {
+      "created_at": "2023-09-25T11:40:42.402Z",
+      "updated_at": "2023-09-25T11:40:42.402Z",
+      "event_name": "Event 1 du contrat 1 du client TEST",
+      "start_date": "2023-11-10T11:00:00Z",
+      "end_date": "2023-11-10T17:00:00Z",
+      "attendees": 50,
+      "notes": "Notes sur l'événement n°1 du contrat n°1 pour le client TEST.",
+      "contract": "d6ceb6b8-aa34-470f-83bc-68f6ea3ea5b6",
+      "locations": [
+        "37b28396-f88f-41f8-a8dc-2a29dfbcd559"
+      ]
     }
   }
 ]
