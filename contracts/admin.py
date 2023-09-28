@@ -28,9 +28,6 @@ class EventInline(admin.TabularInline):
     can_delete = False
     show_change_link = True
 
-    def has_add_permission(self, request, obj):
-        return obj.is_signed
-
 
 @admin.register(Contract)
 class ContractAdmin(admin.ModelAdmin):
@@ -56,6 +53,6 @@ class ContractAdmin(admin.ModelAdmin):
         return True
 
     def has_change_permission(self, request, obj=None):
-        if obj and obj.event and obj.event.is_event_over:
+        if obj and hasattr(obj, "event") and obj.event and obj.event.is_event_over:
             return False
         return True

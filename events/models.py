@@ -56,7 +56,7 @@ class Event(TimestampedModel):
 géré par {self.support_contact}"
 
     def clean(self):
-        """Raise error if end_date is later than start_date and start_date is in past."""
+        """Raise error if start_date is in past or end_date is later than start_date."""
         now = timezone.now()
 
         if self.start_date and self.start_date < now:

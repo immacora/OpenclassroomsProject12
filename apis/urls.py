@@ -11,8 +11,12 @@ from .views import (
     ClientLocationDetailAPIView,
     ClientContractsListAPIView,
     ClientContractDetailAPIView,
+    ClientContractEventCreateAPIView,
+    ClientContractEventDetailAPIView,
+    EventLocationsListAPIView,
+    EventLocationDetailAPIView,
     ContractListAPIView,
-    EventListAPIView
+    EventListAPIView,
 )
 
 
@@ -51,6 +55,26 @@ urlpatterns = [
         "clients/<uuid:client_id>/contracts/<uuid:contract_id>/",
         ClientContractDetailAPIView.as_view(),
         name="client_contract_detail",
+    ),
+    path(
+        "clients/<uuid:client_id>/contracts/<uuid:contract_id>/event/",
+        ClientContractEventCreateAPIView.as_view(),
+        name="client_contract_event",
+    ),
+    path(
+        "clients/<uuid:client_id>/contracts/<uuid:contract_id>/<uuid:event_id>/",
+        ClientContractEventDetailAPIView.as_view(),
+        name="client_contract_event_detail",
+    ),
+    path(
+        "clients/<uuid:client_id>/contracts/<uuid:contract_id>/<uuid:event_id>/locations/",
+        EventLocationsListAPIView.as_view(),
+        name="client_contract_event_locations",
+    ),
+    path(
+        "clients/<uuid:client_id>/contracts/<uuid:contract_id>/<uuid:event_id>/locations/<uuid:location_id>/",
+        EventLocationDetailAPIView.as_view(),
+        name="client_contract_event_location_detail",
     ),
     path("contracts/", ContractListAPIView.as_view(), name="contracts"),
     path("events/", EventListAPIView.as_view(), name="events"),

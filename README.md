@@ -61,7 +61,7 @@ Paste all the following variables with your own values
 ```sh
 # django
 SECRET_KEY=YourSecretKey
-ALLOWED_HOSTS=YourAllowedHosts # test production: *
+ALLOWED_HOSTS=YourAllowedHosts # test: *
 CORS_ALLOWED_ORIGINS=YourAllowedHTTP # ex: http://localhost:8000
 CSRF_TRUSTED_ORIGINS=YourTrustedHTTP # ex: http://localhost:8000
 

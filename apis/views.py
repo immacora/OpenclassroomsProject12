@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
@@ -7,12 +8,15 @@ from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
     ListAPIView,
+    CreateAPIView,
+    RetrieveUpdateAPIView,
 )
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
 
 from clients.permissions import IsSalesContact
-from helpers.functions import update_sales_contact
+from events.permissions import IsSupportContact
+from helpers.functions import update_sales_contact, update_support_contact
 from accounts.models import Employee
 from clients.models import Client
 from locations.models import Location
@@ -28,6 +32,7 @@ from .serializers import (
     LocationDetailSerializer,
     ContractListSerializer,
     ContractDetailSerializer,
+    EventDetailSerializer,
     EventListSerializer,
 )
 from .filters import ContractFilter, EventFilter
@@ -171,23 +176,18 @@ class ClientDetailAPIView(RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         data = request.data
 
-        if request.user.is_staff:
-            if "updated_sales_contact" in data:
-                updated_sales_contact_id = data["updated_sales_contact"]
-                updated_sales_contact = update_sales_contact(
-                    instance, updated_sales_contact_id
-                )
-                if not isinstance(updated_sales_contact, str):
-                    return Response(updated_sales_contact, status=status.HTTP_200_OK)
-                else:
-                    return Response(
-                        {"details": updated_sales_contact},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-            return Response(
-                {"details": "La saisie est invalide."},
-                status=status.HTTP_400_BAD_REQUEST,
+        if request.user.is_staff and "updated_sales_contact" in data:
+            updated_sales_contact_id = data["updated_sales_contact"]
+            updated_sales_contact = update_sales_contact(
+                instance, updated_sales_contact_id
             )
+            if not isinstance(updated_sales_contact, str):
+                return Response(updated_sales_contact, status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {"details": updated_sales_contact},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         else:
             serializer = self.get_serializer(instance, data=data, partial=partial)
             serializer.is_valid(raise_exception=True)
@@ -361,7 +361,7 @@ class ClientContractsListAPIView(ListCreateAPIView):
 class ClientContractDetailAPIView(RetrieveUpdateDestroyAPIView):
     """
     Get and update client contract.
-    Delete contract contract if it is not signed.
+    Delete contract if it is not signed.
 
     Permission : requesting user authenticated and IsAdminUser or IsSalesContact.
     """
@@ -384,6 +384,190 @@ class ClientContractDetailAPIView(RetrieveUpdateDestroyAPIView):
         return Response(
             {"details": "Vous ne pouvez pas supprimer un contrat signé."},
             status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+class ClientContractEventCreateAPIView(CreateAPIView):
+    """Create an event for the client contract if the requesting user is client sales_contact
+    and the contract is_signed."""
+
+    permission_classes = [IsAuthenticated & IsSalesContact]
+    serializer_class = EventDetailSerializer
+
+    def get_object(self):
+        client_id = self.kwargs["client_id"]
+        client = get_object_or_404(Client, client_id=client_id)
+        contract_id = self.kwargs["contract_id"]
+        obj = get_object_or_404(Contract, contract_id=contract_id)
+        self.check_object_permissions(self.request, client)
+        return obj
+
+    def post(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance.is_signed:
+            serializer = self.serializer_class(data=request.data)
+
+            if serializer.is_valid(raise_exception=True):
+                contract_id = self.kwargs["contract_id"]
+                contract = get_object_or_404(Contract, contract_id=contract_id)
+
+                try:
+                    event = Event.objects.create(
+                        contract=contract, **serializer.validated_data
+                    )
+                    event_data = self.serializer_class(event).data
+                    return Response(event_data, status=status.HTTP_201_CREATED)
+                except IntegrityError:
+                    return Response(
+                        {"details": "Un événement existe déjà pour ce contrat."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+        return Response(
+            {"details": "Le contrat doit être signé pour créer un événement."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+class ClientContractEventDetailAPIView(RetrieveUpdateAPIView):
+    """
+    Get client contract event.
+    Update or delete event if it is not over.
+
+    Permission : requesting user authenticated and IsAdminUser or IsSupportContact.
+    """
+
+    permission_classes = [IsAdminUser | IsAuthenticated & IsSupportContact]
+    serializer_class = EventDetailSerializer
+
+    def get_object(self):
+        event_id = self.kwargs["event_id"]
+        obj = get_object_or_404(Event, event_id=event_id)
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", True)
+        instance = self.get_object()
+        data = request.data
+
+        if request.user.is_staff and "updated_support_contact" in data:
+            updated_support_contact_id = data["updated_support_contact"]
+            updated_support_contact = update_support_contact(
+                instance, updated_support_contact_id
+            )
+            if not isinstance(updated_support_contact, str):
+                return Response(updated_support_contact, status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {"details": updated_support_contact},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        else:
+            serializer = self.get_serializer(instance, data=data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data)
+
+
+class EventLocationsListAPIView(ListCreateAPIView):
+    """
+    Get event locations list.
+    Create or add location(s) to event.
+
+    Permission : requesting user authenticated and IsAdminUser or IsSupportContact.
+    """
+
+    permission_classes = [IsAdminUser | IsAuthenticated & IsSupportContact]
+    serializer_class = LocationDetailSerializer
+
+    def list(self, request, *args, **kwargs):
+        event_id = kwargs["event_id"]
+        event = get_object_or_404(Event, event_id=event_id)
+        queryset = event.locations.all()
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        event_id = kwargs["event_id"]
+        event = get_object_or_404(Event, event_id=event_id)
+        locations_data = request.data.get("locations", [])
+        locations_added = []
+
+        for location_data in locations_data:
+            serializer = self.serializer_class(data=location_data)
+
+            if serializer.is_valid(raise_exception=True):
+                location, created = Location.objects.get_or_create(
+                    **serializer.validated_data
+                )
+                event.locations.add(location)
+                locations_added.append(location)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        locations_serializer = LocationDetailSerializer(locations_added, many=True)
+        return Response(data=locations_serializer.data, status=status.HTTP_201_CREATED)
+
+
+class EventLocationDetailAPIView(RetrieveUpdateDestroyAPIView):
+    """
+    Get event location detail.
+    Edit and delete location if it is not in use by another client or event or remove it.
+
+    Permission : requesting user authenticated and IsAdminUser or IsSupportContact.
+    """
+
+    permission_classes = [IsAdminUser | IsAuthenticated & IsSupportContact]
+    serializer_class = LocationDetailSerializer
+
+    def get_object(self):
+        event_id = self.kwargs["event_id"]
+        event = get_object_or_404(Event, event_id=event_id)
+        location_id = self.kwargs["location_id"]
+        obj = get_object_or_404(Location, location_id=location_id)
+        self.check_object_permissions(self.request, event)
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", True)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+
+        if serializer.is_valid(raise_exception=True):
+            if (
+                instance.client_locations.count() == 0
+                and instance.event_locations.count() == 1
+            ):
+                self.perform_update(serializer)
+                return Response(serializer.data)
+            return Response(
+                {
+                    "details": "Ce lieu est utilisé par un autre modèle. Vous devez le supprimer de ce modèle."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if (
+            instance.client_locations.count() == 0
+            and instance.event_locations.count() == 1
+        ):
+            return self.destroy(request, *args, **kwargs)
+        event_id = self.kwargs["event_id"]
+        event = get_object_or_404(Event, event_id=event_id)
+        event.locations.remove(instance.location_id)
+        return Response(
+            {"details": "Le lieu a été retiré de cet événement."},
+            status=status.HTTP_200_OK,
         )
 
 

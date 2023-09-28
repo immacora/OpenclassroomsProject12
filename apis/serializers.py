@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
 from rest_framework.serializers import (
@@ -55,17 +56,8 @@ class CreateEmployeeSerializer(ModelSerializer):
 
     class Meta:
         model = Employee
-        fields = (
-            "employee_id",
-            "employee_number",
-            "last_name",
-            "first_name",
-            "department",
-            "user",
-            "created_at",
-            "updated_at",
-        )
-        read_only__fields = ("employee_id", "created_at", "updated_at")
+        fields = "__all__"
+        read_only_fields = ("employee_id", "created_at", "updated_at")
 
 
 class CustomUserDetailSerializer(ModelSerializer):
@@ -74,7 +66,16 @@ class CustomUserDetailSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ("user_id", "email", "is_active", "is_staff", "date_joined")
-        read_only__fields = ("user_id", "is_staff", "date_joined")
+        read_only_fields = ("user_id", "is_staff", "date_joined")
+
+
+class CustomUserListSerializer(ModelSerializer):
+    """Serializer with minimal informations for other models list."""
+
+    class Meta:
+        model = CustomUser
+        fields = ("user_id", "email")
+        read_only_fields = ("user_id",)
 
 
 class EmployeeDetailSerializer(ModelSerializer):
@@ -84,29 +85,8 @@ class EmployeeDetailSerializer(ModelSerializer):
 
     class Meta:
         model = Employee
-        fields = (
-            "employee_id",
-            "employee_number",
-            "last_name",
-            "first_name",
-            "department",
-            "user",
-            "created_at",
-            "updated_at",
-        )
-        read_only__fields = ("employee_id", "created_at", "updated_at")
-
-
-class CustomUserListSerializer(ModelSerializer):
-    """Serializer with email only for custom user identification."""
-
-    class Meta:
-        model = CustomUser
-        fields = (
-            "user_id",
-            "email",
-        )
-        read_only__fields = ("user_id",)
+        fields = "__all__"
+        read_only_fields = ("employee_id", "created_at", "updated_at")
 
 
 class EmployeeListSerializer(ModelSerializer):
@@ -123,7 +103,7 @@ class EmployeeListSerializer(ModelSerializer):
             "department",
             "user",
         )
-        read_only__fields = ("employee_id",)
+        read_only_fields = ("employee_id",)
 
 
 class LocationDetailSerializer(ModelSerializer):
@@ -131,15 +111,8 @@ class LocationDetailSerializer(ModelSerializer):
 
     class Meta:
         model = Location
-        fields = (
-            "location_id",
-            "street_number",
-            "street_name",
-            "city",
-            "zip_code",
-            "country",
-        )
-        read_only__fields = ("location_id",)
+        fields = "__all__"
+        read_only_fields = ("location_id",)
 
 
 class ClientDetailSerializer(ModelSerializer):
@@ -154,22 +127,8 @@ class ClientDetailSerializer(ModelSerializer):
 
     class Meta:
         model = Client
-        fields = (
-            "client_id",
-            "company_name",
-            "siren",
-            "first_name",
-            "last_name",
-            "email",
-            "phone_number",
-            "contract_requested",
-            "sales_contact",
-            "updated_sales_contact",
-            "locations",
-            "created_at",
-            "updated_at",
-        )
-        read_only__fields = ("client_id", "sales_contact", "created_at", "updated_at")
+        fields = "__all__"
+        read_only_fields = ("client_id", "sales_contact", "created_at", "updated_at")
 
 
 class EmployeeStrSerializer(ModelSerializer):
@@ -198,7 +157,7 @@ class ClientListSerializer(ModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only__fields = ("client_id", "created_at", "updated_at")
+        read_only_fields = ("client_id", "created_at", "updated_at")
 
 
 class ContractDetailSerializer(ModelSerializer):
@@ -208,17 +167,8 @@ class ContractDetailSerializer(ModelSerializer):
 
     class Meta:
         model = Contract
-        fields = (
-            "contract_id",
-            "contract_description",
-            "amount",
-            "payment_due",
-            "is_signed",
-            "client",
-            "created_at",
-            "updated_at",
-        )
-        read_only__fields = ("contract_id", "client", "created_at", "updated_at")
+        fields = "__all__"
+        read_only_fields = ("contract_id", "client", "created_at", "updated_at")
 
 
 class ClientStrSerializer(ModelSerializer):
@@ -247,28 +197,55 @@ class ContractListSerializer(ModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only__fields = ("contract_id", "created_at", "updated_at")
+        read_only_fields = ("contract_id", "created_at", "updated_at")
+
+
+class ContractSerializerForEvent(ModelSerializer):
+    """Serializer with useful informations for event."""
+
+    client = ClientDetailSerializer()
+
+    class Meta:
+        model = Contract
+        fields = "__all__"
+        read_only_fields = ("contract_id", "client", "created_at", "updated_at")
 
 
 class EventDetailSerializer(ModelSerializer):
-    """Serializer with all event informations."""
+    """
+    Serializer with all event informations.
+    Update support_contact (MANAGEMENT ONLY) with updated_support_contact write_only field.
+    """
 
-    contract = ContractListSerializer(required=False)
+    contract = ContractSerializerForEvent(required=False)
+    support_contact = EmployeeStrSerializer(required=False)
+    updated_support_contact = UUIDField(write_only=True, required=False)
+
+    def validate(self, data):
+        """Validate start_date is not in past and end_date is later than start_date."""
+
+        start_date = data.get("start_date")
+        end_date = data.get("end_date")
+
+        if start_date and start_date < timezone.now():
+            raise ValidationError("La date de début ne peut pas être dans le passé.")
+
+        if start_date and end_date and end_date < start_date:
+            raise ValidationError(
+                "La date de fin doit être postérieure à la date de début."
+            )
+        return data
 
     class Meta:
         model = Event
-        fields = (
+        fields = "__all__"
+        read_only_fields = (
             "event_id",
-            "event_name",
-            "start_date",
-            "end_date",
-            "attendees",
-            "notes",
             "contract",
             "support_contact",
-            "locations",
+            "created_at",
+            "updated_at",
         )
-        read_only__fields = ("event_id", "contract", "created_at", "updated_at")
 
 
 class EventListSerializer(ModelSerializer):
@@ -287,4 +264,4 @@ class EventListSerializer(ModelSerializer):
             "contract",
             "support_contact",
         )
-        read_only__fields = ("event_id", "contract", "created_at", "updated_at")
+        read_only_fields = ("event_id", "contract", "created_at", "updated_at")
