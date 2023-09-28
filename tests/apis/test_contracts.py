@@ -25,7 +25,7 @@ class TestGetContracts:
             "management_employee"
         ].user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
-        response = api_client.get(reverse("clients"), headers=headers)
+        response = api_client.get(reverse("contracts"), headers=headers)
         assert response.status_code == status.HTTP_200_OK
         assert Contract.objects.count() == 5
         assert 5 == response.data["count"]
@@ -42,7 +42,7 @@ class TestGetContracts:
         contracts = ContractFactory.create_batch(5)  # noqa: F841
         access_token = employees_users_with_tokens["sales_employee"].user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
-        response = api_client.get(reverse("clients"), headers=headers)
+        response = api_client.get(reverse("contracts"), headers=headers)
         assert response.status_code == status.HTTP_200_OK
         assert 5 == response.data["count"]
         assert len(response.data["results"]) == 5
@@ -58,7 +58,7 @@ class TestGetContracts:
         contracts = ContractFactory.create_batch(5)  # noqa: F841
         access_token = employees_users_with_tokens["support_employee"].user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
-        response = api_client.get(reverse("clients"), headers=headers)
+        response = api_client.get(reverse("contracts"), headers=headers)
         assert response.status_code == status.HTTP_200_OK
         assert 5 == response.data["count"]
         assert len(response.data["results"]) == 5
@@ -74,6 +74,6 @@ class TestGetContracts:
         contracts = ContractFactory.create_batch(5)  # noqa: F841
         access_token = "INVALIDTOKEN"
         headers = {"Authorization": f"Bearer {access_token}"}
-        response = api_client.get(reverse("clients"), headers=headers)
+        response = api_client.get(reverse("contracts"), headers=headers)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         assert "token_not_valid" in response.data["code"]

@@ -7,6 +7,8 @@ from tests.factories import (
     SalesContactFactory,
     ClientFactory,
     ContractFactory,
+    SupportContactFactory,
+    EventFactory,
 )
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -17,6 +19,8 @@ register(LocationFactory)
 register(SalesContactFactory)
 register(ClientFactory)
 register(ContractFactory)
+register(SupportContactFactory)
+register(EventFactory)
 
 
 @pytest.fixture
@@ -76,7 +80,13 @@ def new_sales_contact(db, sales_contact_factory):
 
 
 @pytest.fixture
-def new_client(db, client_factory, location_factory):
+def new_support_contact(db, support_contact_factory):
+    support_contact = support_contact_factory.create()
+    return support_contact
+
+
+@pytest.fixture
+def new_client(db, client_factory):
     client = client_factory.create()
     refresh = RefreshToken.for_user(client.sales_contact.user)
     client.sales_contact.user.access_token = str(refresh.access_token)
@@ -103,3 +113,13 @@ def new_contract(db, contract_factory):
     client_user.access_token = str(refresh.access_token)
     client_user.refresh_token = str(refresh)
     return contract
+
+
+@pytest.fixture
+def new_event(db, event_factory):
+    event = event_factory.create()
+    event_user = event.support_contact.user
+    refresh = RefreshToken.for_user(event_user)
+    event_user.access_token = str(refresh.access_token)
+    event_user.refresh_token = str(refresh)
+    return event

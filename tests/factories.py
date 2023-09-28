@@ -1,7 +1,8 @@
+from datetime import datetime, timedelta, timezone
 import random
 import factory
 from uuid import uuid4
-from factory.fuzzy import FuzzyInteger
+from factory.fuzzy import FuzzyInteger, FuzzyDateTime
 from django.contrib.auth import get_user_model
 from faker import Faker
 
@@ -9,6 +10,7 @@ from accounts.models import Employee
 from locations.models import Location
 from clients.models import Client
 from contracts.models import Contract
+from events.models import Event
 
 fake = Faker("fr_FR")
 CustomUser = get_user_model()
@@ -44,7 +46,7 @@ class LocationFactory(factory.django.DjangoModelFactory):
     street_name = factory.LazyAttribute(lambda _: fake.street_name())
     city = factory.LazyAttribute(lambda _: fake.city())
     zip_code = factory.Sequence(lambda n: "{:05}".format(random.randrange(100000)))
-    country = fake.country()
+    country = "FRANCE"
 
 
 class SalesContactFactory(factory.django.DjangoModelFactory):
@@ -56,6 +58,18 @@ class SalesContactFactory(factory.django.DjangoModelFactory):
     first_name = factory.LazyAttribute(lambda _: fake.first_name())
     last_name = factory.LazyAttribute(lambda _: fake.last_name())
     department = "SALES"
+    user = factory.SubFactory(CustomUserFactory)
+
+
+class SupportContactFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Employee
+
+    employee_id = factory.LazyFunction(uuid4)
+    employee_number = factory.Sequence(lambda n: n + 200)
+    first_name = factory.LazyAttribute(lambda _: fake.first_name())
+    last_name = factory.LazyAttribute(lambda _: fake.last_name())
+    department = "SUPPORT"
     user = factory.SubFactory(CustomUserFactory)
 
 
@@ -95,3 +109,35 @@ class ContractFactory(factory.django.DjangoModelFactory):
     payment_due = factory.Faker("random_number", digits=5)
     is_signed = False
     client = factory.SubFactory(ClientFactory)
+
+
+class EventFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Event
+
+    event_id = factory.LazyFunction(uuid4)
+    event_name = "TEST event name"
+    start_date = FuzzyDateTime(
+        datetime.utcnow().replace(tzinfo=timezone.utc),
+        datetime.utcnow().replace(tzinfo=timezone.utc) + timedelta(days=30),
+    )
+    end_date = factory.LazyAttribute(
+        lambda obj: FuzzyDateTime(
+            obj.start_date, obj.start_date + timedelta(days=1)
+        ).fuzz()
+    )
+    attendees = factory.Faker("random_number", digits=3)
+    notes = factory.Faker("text", max_nb_chars=2000)
+    contract = factory.SubFactory(ContractFactory)
+    support_contact = factory.SubFactory(SupportContactFactory)
+    locations = factory.RelatedFactoryList(
+        LocationFactory, factory_related_name="event_locations"
+    )
+
+    @factory.post_generation
+    def locations(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for location in extracted:
+                self.locations.add(location)

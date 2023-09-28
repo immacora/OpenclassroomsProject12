@@ -99,7 +99,7 @@ class TestGetClientContract:
         """
         GIVEN a fixture for contract with its client sales_contact valid token
         WHEN the client_contract_detail endpoint is requested (GET)
-        THEN checks that response is 200 and datas are displayed
+        THEN checks that response is 404
         """
         access_token = new_contract.client.sales_contact.user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
@@ -168,7 +168,7 @@ class TestPutClientContract:
         """
         GIVEN a fixture for contract with its client sales_contact valid token and invalid data
         WHEN the client_contract_detail endpoint is updated to (PUT)
-        THEN checks that response is 200 and datas are displayed
+        THEN checks that response is 400 and error messages are displayed
         """
         access_token = new_contract.client.sales_contact.user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
