@@ -205,6 +205,39 @@ class TestPutClientLocation:
             in response.data["country"]
         )
 
+    def test_put_client_location_route_failed_with_used_location_bad_request(
+        self, api_client, new_client_with_location, new_client, new_location
+    ):
+        """
+        GIVEN fixtures for client with location, its sales contacts valids tokens, client, location, and valid data
+        WHEN the client_location_detail endpoint is updated with the location added to both clients (PUT)
+        THEN checks that response is 400 and error message is displayed
+        """
+        new_client_with_location.locations.add(new_location)
+        new_client.locations.add(new_location)
+        access_token = new_client.sales_contact.user.access_token
+        headers = {"Authorization": f"Bearer {access_token}"}
+        new_client_id = new_client.client_id
+        new_client_location_id = new_client.locations.first().location_id
+        response = api_client.put(
+            reverse(
+                "client_location_detail",
+                kwargs={
+                    "client_id": new_client_id,
+                    "location_id": new_client_location_id,
+                },
+            ),
+            headers=headers,
+            data=self.valid_data,
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert Location.objects.count() == 2
+        assert (
+            "Ce lieu est utilisé par un autre modèle. Vous devez le supprimer de ce modèle."
+            in response.data["details"]
+        )
+
     def test_put_client_location_route_failed_with_forbidden(
         self, api_client, new_client_with_location, employees_users_with_tokens
     ):
@@ -232,39 +265,6 @@ class TestPutClientLocation:
         assert (
             "Vous n'avez pas la permission d'effectuer cette action."
             in response.data["detail"]
-        )
-
-    def test_put_client_location_route_failed_with_used_location_forbidden(
-        self, api_client, new_client_with_location, new_client, new_location
-    ):
-        """
-        GIVEN fixtures for client with location and client, with sales contacts valids tokens, location, and valid data
-        WHEN the client_location_detail endpoint is updated with the location added to both clients (PUT)
-        THEN checks that response is 403 and error message is displayed
-        """
-        new_client_with_location.locations.add(new_location)
-        new_client.locations.add(new_location)
-        access_token = new_client.sales_contact.user.access_token
-        headers = {"Authorization": f"Bearer {access_token}"}
-        new_client_client_id = new_client.client_id
-        new_client_location_id = new_client.locations.first().location_id
-        response = api_client.put(
-            reverse(
-                "client_location_detail",
-                kwargs={
-                    "client_id": new_client_client_id,
-                    "location_id": new_client_location_id,
-                },
-            ),
-            headers=headers,
-            data=self.valid_data,
-            format="json",
-        )
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert Location.objects.count() == 2
-        assert (
-            "Ce lieu est utilisé par un autre modèle. Vous devez le supprimer de ce modèle."
-            in response.data["details"]
         )
 
     def test_put_client_location_failed_with_unauthorized(
@@ -326,21 +326,21 @@ class TestDeleteClientLocation:
         self, api_client, new_client_with_location, new_client, new_location
     ):
         """
-       GIVEN fixtures for client with location, client with its sales contact valid token and location
-        WHEN the client_location_detail endpoint is deleted (DEL)
-        THEN checks that response is 200 and message is displayed
+        GIVEN fixtures for client with location, client with its sales contact valid token and location
+         WHEN the client_location_detail endpoint is deleted (DEL)
+         THEN checks that response is 200 and message is displayed
         """
         new_client_with_location.locations.add(new_location)
         new_client.locations.add(new_location)
         access_token = new_client.sales_contact.user.access_token
         headers = {"Authorization": f"Bearer {access_token}"}
-        new_client_client_id = new_client.client_id
+        new_client_id = new_client.client_id
         new_client_location_id = new_client.locations.first().location_id
         response = api_client.delete(
             reverse(
                 "client_location_detail",
                 kwargs={
-                    "client_id": new_client_client_id,
+                    "client_id": new_client_id,
                     "location_id": new_client_location_id,
                 },
             ),
@@ -348,7 +348,7 @@ class TestDeleteClientLocation:
         )
         assert response.status_code == status.HTTP_200_OK
         assert Location.objects.count() == 2
-        assert ("Le lieu a été retiré de ce client." in response.data["details"])
+        assert "Le lieu a été retiré de ce client." in response.data["details"]
 
     def test_delete_client_location_route_failed_with_forbidden(
         self, api_client, new_client_with_location, employees_users_with_tokens

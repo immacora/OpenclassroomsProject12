@@ -123,3 +123,15 @@ def new_event(db, event_factory):
     event_user.access_token = str(refresh.access_token)
     event_user.refresh_token = str(refresh)
     return event
+
+
+@pytest.fixture
+def new_event_with_location(db, event_factory, location_factory):
+    event = event_factory.create()
+    event_user = event.support_contact.user
+    location = location_factory.create()
+    event.locations.add(location)
+    refresh = RefreshToken.for_user(event_user)
+    event_user.access_token = str(refresh.access_token)
+    event_user.refresh_token = str(refresh)
+    return event

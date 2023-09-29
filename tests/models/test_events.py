@@ -3,6 +3,7 @@ from django.db.utils import IntegrityError
 
 from events.models import Event
 from contracts.models import Contract
+from locations.models import Location
 
 
 class TestEvents:
@@ -46,3 +47,12 @@ class TestEvents:
             Event.objects.create(contract=new_contract)
             assert Contract.objects.count() == 1
             assert Event.objects.count() == 1
+
+    def test_delete_event_and_his_location(self, new_event_with_location):
+        """Tests if event deletion delete his location.."""
+
+        assert Event.objects.count() == 1
+        assert Location.objects.count() == 1
+        new_event_with_location.delete()
+        assert Event.objects.count() == 0
+        assert Location.objects.count() == 0
