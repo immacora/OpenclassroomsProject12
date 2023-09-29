@@ -30,6 +30,11 @@ The project is defined in the specifications (documentation directory).
   </a>
 </p>
 
+### Entity Relationship Diagram
+<p align="center">
+  <img src="documentation/ERD.png" alt="Entity Relationship Diagram" />
+</p>
+
 ### Clone Project
 ```sh
 git clone https://github.com/immacora/OpenclassroomsProject12
