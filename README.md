@@ -28,6 +28,9 @@ The project is defined in the specifications (documentation directory).
   <a href="https://code.visualstudio.com/">
     <img src="https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?&style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="vscode-badge">
   </a>
+  <a href="https://sentry.io/">
+    <img src="https://img.shields.io/badge/sentry-584674?style=for-the-badge&logo=sentry&logoColor=white" alt="sentry-badge">
+  </a>
 </p>
 
 ### Entity Relationship Diagram
@@ -59,6 +62,9 @@ Install [PostgreSQL 15.3](https://www.postgresql.org/download/).
 
 [Create a new PostgreSQL database](https://www.postgresqltutorial.com/postgresql-getting-started/connect-to-postgresql-database/) for the project.
 
+### Create Sentry project
+Create a new [Sentry project](https://docs.sentry.io/platforms/python/).
+
 ### Settings and Environment Variables
 Create a .env file in the project's root folder.
 Paste all the following variables with your own values
@@ -79,6 +85,9 @@ POSTGRES_PORT=YourPort # ex: 5432
 # simplejwt
 ACCESS_TOKEN_LIFETIME=NumberOfLifetimeMinutes # ex: 5
 REFRESH_TOKEN_LIFETIME=NumberOfLifetimeDays # ex: 1
+
+# sentry
+SENTRY_DSN=YourprojectDSN
 ```
 
 ### Project Setup and Run
@@ -105,7 +114,7 @@ In the API, the creation, update and deletion of a user are linked to that of th
 
 ### Optional
 
-If you want to pre-populate the database with accounts, clients, contacts and events, to test the API endpoints, load sample data as follows (user passwords are the same as adminTEST):
+If you want to pre-populate the database with accounts, clients, contacts and events to test the API endpoints, load sample data as follows (user passwords are the same as adminTEST):
 
 ```sh
 py manage.py loaddata fixtures/datas.json
