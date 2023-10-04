@@ -91,7 +91,7 @@ class ClientFactory(factory.django.DjangoModelFactory):
     )
 
     @factory.post_generation
-    def locations(self, create, extracted, **kwargs):
+    def locations(self, create, extracted, **kwargs):  # noqa: F811
         if not create:
             return
         if extracted:
@@ -135,7 +135,7 @@ class EventFactory(factory.django.DjangoModelFactory):
     )
 
     @factory.post_generation
-    def locations(self, create, extracted, **kwargs):
+    def locations(self, create, extracted, **kwargs):  # noqa: F811
         if not create:
             return
         if extracted:
